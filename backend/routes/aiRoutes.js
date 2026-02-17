@@ -215,18 +215,19 @@ const fs = require("fs");
 const path = require("path");
 const pdfParse = require("pdf-parse");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-
+const natural = require("natural");
 const User = require("../models/User");
 const Vacancy = require("../models/Vacancy");
+const tokenizer = new natural.WordTokenizer();
 const analysisProgress = {};
-
+// const analysisProgress = {};
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
   model:
   // "gemini-2.5-pro",
-   "gemini-2.5-flash-lite",
-    // "gemini-2.5-flash",
+  //  "gemini-2.5-flash-lite",
+    "gemini-2.5-flash",
   generationConfig: {
     responseMimeType: "application/json",
     temperature: 0.2
@@ -234,8 +235,84 @@ const model = genAI.getGenerativeModel({
 });
 
 
+function cleanText(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function textToVector(text) {
+  const tokens = tokenizer.tokenize(text);
+  const freq = {};
+  tokens.forEach(t => (freq[t] = (freq[t] || 0) + 1));
+  return freq;
+}
+
+function cosineSimilarity(vecA, vecB) {
+  const intersection = Object.keys(vecA).filter(k => k in vecB);
+  let dot = 0;
+  intersection.forEach(k => (dot += vecA[k] * vecB[k]));
+
+  const magA = Math.sqrt(
+    Object.values(vecA).reduce((s, v) => s + v * v, 0)
+  );
+  const magB = Math.sqrt(
+    Object.values(vecB).reduce((s, v) => s + v * v, 0)
+  );
+
+  return magA && magB ? dot / (magA * magB) : 0;
+}
+
+async function computePreScore(userId, vacancy) {
+  try {
+    const user = await User.findById(userId);
+    if (!user?.resume) return 0;
+
+    const resumePath = path.join(__dirname, "../", user.resume);
+    const pdf = await pdfParse(fs.readFileSync(resumePath));
+
+    const resumeText = cleanText(pdf.text).slice(0, 3000);
+
+    const jobText = cleanText(
+      `${vacancy.skills?.join(" ") || ""} ${vacancy.jobDescription || ""}`
+    );
+
+    const vecA = textToVector(resumeText);
+    const vecB = textToVector(jobText);
+
+    const score = Math.round(cosineSimilarity(vecA, vecB) * 100);
+
+    console.log(
+      `📊 PRE-SCORE | Job: ${vacancy.title} | Score: ${score}`
+    );
+
+    return score;
+  } catch (err) {
+    console.error("PreScore error:", err);
+    return 0;
+  }
+}
 
 
+// async function computePreScore(userId, vacancy) {
+//   const user = await User.findById(userId);
+//   if (!user?.resume) return 0;
+
+//   const resumePath = path.join(__dirname, "../", user.resume);
+//   const pdf = await pdfParse(fs.readFileSync(resumePath));
+
+//   const resumeText = cleanText(pdf.text).slice(0, 3000);
+//   const jobText = cleanText(
+//     `${vacancy.skills?.join(" ")} ${vacancy.description || ""}`
+//   );
+
+//   const vecA = textToVector(resumeText);
+//   const vecB = textToVector(jobText);
+
+//   return Math.round(cosineSimilarity(vecA, vecB) * 100);
+// }
 
 async function analyzeVacancyForUser(userId, vacancyId) {
   const user = await User.findById(userId);
@@ -257,7 +334,7 @@ async function analyzeVacancyForUser(userId, vacancyId) {
 
   /* ---------- JOB DATA ---------- */
   const jobSkills = (vacancy.skills || []).join(", ");
-  const jobDescription = vacancy.description || "";
+  const jobDescription = vacancy.jobDescription|| "";
 
   const prompt = `
 You are an Applicant Tracking System (ATS).
@@ -329,39 +406,54 @@ rawText = rawText
 
 
 router.get("/dashboard-matches/:userId", async (req, res) => {
-  try {
-    const { userId } = req.params;
+  const { userId } = req.params;
 
-    const vacancies = await Vacancy.find({
-      aiScores: {
-        $elemMatch: {
-          userId,
-          score: { $gte: 70 }
-        }
-      }
-    }).select("title aiScores");
+  const vacancies = await Vacancy.find({
+    aiScores: { $elemMatch: { userId, score: { $gte: 70 } } }
+  }).select("title aiScores");
 
-    const matches = vacancies.map(v => {
-      const scoreObj = v.aiScores.find(
-        s => s.userId.toString() === userId
-      );
+  const matches = vacancies.map(v => {
+    const s = v.aiScores.find(a => a.userId.toString() === userId);
+    return { vacancyId: v._id, title: v.title, score: s.score };
+  });
 
-      return {
-        vacancyId: v._id,
-        title: v.title,
-        score: scoreObj?.score || 0
-      };
-    });
-
-    res.json({
-      count: matches.length,
-      matches
-    });
-  } catch (err) {
-    console.error("Dashboard match error:", err);
-    res.status(500).json({ message: "Failed to fetch dashboard matches" });
-  }
+  res.json({ count: matches.length, matches });
 });
+
+// router.get("/dashboard-matches/:userId", async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+
+//     const vacancies = await Vacancy.find({
+//       aiScores: {
+//         $elemMatch: {
+//           userId,
+//           score: { $gte: 70 }
+//         }
+//       }
+//     }).select("title aiScores");
+
+//     const matches = vacancies.map(v => {
+//       const scoreObj = v.aiScores.find(
+//         s => s.userId.toString() === userId
+//       );
+
+//       return {
+//         vacancyId: v._id,
+//         title: v.title,
+//         score: scoreObj?.score || 0
+//       };
+//     });
+
+//     res.json({
+//       count: matches.length,
+//       matches
+//     });
+//   } catch (err) {
+//     console.error("Dashboard match error:", err);
+//     res.status(500).json({ message: "Failed to fetch dashboard matches" });
+//   }
+// });
 
 
 // router.post("/match-score", async (req, res) => {
@@ -459,7 +551,7 @@ router.post("/match-score", async (req, res) => {
 //       s => s.userId.toString() === userId
 //     );
 
-//     // 🔥 ALWAYS return JSON
+//     //  ALWAYS return JSON
 //     return res.json(
 //       score || {
 //         score: 0,
@@ -485,126 +577,130 @@ router.post("/match-score", async (req, res) => {
 //   }
 // });
 
-// router.post("/reanalyze-missing/:userId", async (req, res) => {
-//   const { userId } = req.params;
-
-//   const vacancies = await Vacancy.find();
-//   let fixed = 0;
-
-//   for (const vac of vacancies) {
-//     const scoreExists = vac.aiScores?.some(
-//       s => s.userId.toString() === userId
-//     );
-
-//     if (!scoreExists) {
-//       try {
-//         await analyzeVacancyForUser(userId, vac._id);
-//         fixed++;
-//         await new Promise(r => setTimeout(r, 5000));
-//       } catch {}
-//     }
-//   }
-
-//   res.json({
-//     message: "Missing scores regenerated",
-//     fixed
-//   });
-// });
-
-
 router.post("/analyze-all/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
-
-    const BATCH_SIZE = 1;      // safest for Gemini
-    const DELAY_MS = 5000;     // 5 sec delay
-
     const vacancies = await Vacancy.find();
-    const total = vacancies.length;
 
     analysisProgress[userId] = {
       analyzed: 0,
-      total,
+      total: vacancies.length,
       status: "analyzing"
     };
 
-    let analyzed = 0;
-
+    // ===== PHASE 1: MANUAL PRE-SCORE =====
     for (const vac of vacancies) {
-      try {
-        const alreadyDone = vac.aiScores?.some(
-          s => s.userId.toString() === userId
-        );
+      const preScore = await computePreScore(userId, vac);
 
-        if (!alreadyDone) {
-          await analyzeVacancyForUser(userId, vac._id);
+      await Vacancy.updateOne(
+        { _id: vac._id },
+        {
+          $pull: { preScores: { userId } } // avoid duplicates
         }
+      );
 
-        analyzed++;
-        analysisProgress[userId].analyzed = analyzed;
+      await Vacancy.updateOne(
+        { _id: vac._id },
+        {
+          $push: {
+            preScores: {
+              userId,
+              score: preScore
+            }
+          }
+        }
+      );
 
-        // ⏳ delay EVERY job
-        await new Promise(res => setTimeout(res, DELAY_MS));
+      analysisProgress[userId].analyzed++;
+    }
 
+    // ===== PHASE 2: AI ONLY TOP MATCHES =====
+    const updatedVacancies = await Vacancy.find();
+
+    const shortlisted = updatedVacancies
+      .filter(v =>
+        v.preScores?.some(
+          s => s.userId.toString() === userId && s.score >= 60
+        )
+      )
+      .slice(0, 5); // TOP 5 ONLY
+
+    for (const vac of shortlisted) {
+      try {
+        await analyzeVacancyForUser(userId, vac._id);
+        await new Promise(r => setTimeout(r, 5000)); // avoid quota hit
       } catch (err) {
-        console.error(
-          "Analysis failed for vacancy:",
-          vac._id.toString(),
-          err.message
+        console.log(
+          "⚠️ Gemini quota / server busy. Skipping AI for:",
+          vac.title
         );
-        analyzed++;
-        analysisProgress[userId].analyzed = analyzed;
       }
     }
 
     analysisProgress[userId].status = "completed";
-
-    res.json({
-      message: "All jobs analyzed",
-      total
-    });
+    res.json({ message: "Analysis completed successfully" });
 
   } catch (err) {
-    console.error("Auto analysis failed:", err);
-    res.status(500).json({ message: "Auto analysis failed" });
+    console.error("Analyze-all error:", err);
+    res.status(500).json({ message: "Analysis failed" });
   }
 });
 
-// router.post("/analyze-initial/:userId", async (req, res) => {
-//   const { userId } = req.params;
-
+// router.post("/analyze-all/:userId", async (req, res) => {
 //   try {
-//     // 🔍 Check if user already has ANY score
-//     const alreadyAnalyzed = await Vacancy.exists({
-//       "aiScores.userId": userId
-//     });
+//     const { userId } = req.params;
 
-//     if (alreadyAnalyzed) {
-//       return res.json({ message: "Initial analysis already done" });
+//     const BATCH_SIZE = 1;      // safest for Gemini
+//     const DELAY_MS = 5000;     // 5 sec delay
+
+//     const vacancies = await Vacancy.find();
+//     const total = vacancies.length;
+
+//     analysisProgress[userId] = {
+//       analyzed: 0,
+//       total,
+//       status: "analyzing"
+//     };
+
+//     let analyzed = 0;
+
+//     for (const vac of vacancies) {
+//       try {
+//         const alreadyDone = vac.aiScores?.some(
+//           s => s.userId.toString() === userId
+//         );
+
+//         if (!alreadyDone) {
+//           await analyzeVacancyForUser(userId, vac._id);
+//         }
+
+//         analyzed++;
+//         analysisProgress[userId].analyzed = analyzed;
+
+//         //  delay EVERY job
+//         await new Promise(res => setTimeout(res, DELAY_MS));
+
+//       } catch (err) {
+//         console.error(
+//           "Analysis failed for vacancy:",
+//           vac._id.toString(),
+//           err.message
+//         );
+//         analyzed++;
+//         analysisProgress[userId].analyzed = analyzed;
+//       }
 //     }
 
-//     // 🎯 Pick only 6 jobs (latest / most relevant)
-//     const jobs = await Vacancy.find()
-//       .sort({ createdAt: -1 })
-//       .limit(6);
-
-//     // 🔥 Fire-and-forget (NO await)
-//     jobs.forEach((job, index) => {
-//       setTimeout(() => {
-//         analyzeVacancyForUser(userId, job._id)
-//           .catch(err =>
-//             console.error("Initial analysis error:", err.message)
-//           );
-//       }, index * 3000); // 3s gap (safe for Gemini)
-//     });
+//     analysisProgress[userId].status = "completed";
 
 //     res.json({
-//       message: "Initial resume analysis started",
-//       jobsQueued: jobs.length
+//       message: "All jobs analyzed",
+//       total
 //     });
+
 //   } catch (err) {
-//     console.error("Initial analysis failed:", err);
-//     res.status(500).json({ message: "Initial analysis failed" });
+//     console.error("Auto analysis failed:", err);
+//     res.status(500).json({ message: "Auto analysis failed" });
 //   }
 // });
 

@@ -95,7 +95,7 @@ export default function HRLogin({ setUser }) {
       // Save HR info in localStorage (no token)
       localStorage.setItem("user", JSON.stringify(HR_CREDENTIALS));
        setUser(HR_CREDENTIALS); //
-      navigate("/hr-dashboard"); // go to HR dashboard
+      navigate("/home"); // go to HR dashboard
     } else {
       setError("Invalid email or password");
     }
