@@ -1834,7 +1834,7 @@ const checkScore = async (vacancyId) => {
             </h3>
 
             <p className="text-gray-400 mt-2">
-              {vac.description}
+              {vac.jobDescription}
             </p>
 
             {/* Actions */}

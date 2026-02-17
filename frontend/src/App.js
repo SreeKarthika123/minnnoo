@@ -101,8 +101,11 @@ import { useState } from "react";
 import Dashboard from "./components/Dashboard";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import CreateJob from "./components/CreateJob";
 import Profile from "./components/Profile";
 import HRLogin from "./pages/HRLogin";
+import Home from "./components/Home";
+import Vacancies from "./pages/Vacancies";
 import HrDashboard from "./components/HrDashboard";
 import Recruitment from "./pages/Recruitment";
 // import mongoose from "mongoose";
@@ -152,6 +155,15 @@ function App() {
   element={<HRLogin setUser={setUser} />}
 />
 
+ <Route
+        path="/create-job"
+        element={
+          user?.role === "hr"
+            ? <CreateJob />
+            : <Navigate to="/hr-login" />
+        }
+      />
+
 {/* <Route
   path="/applications/matched"
   element={<MatchedApplications />}
@@ -175,6 +187,8 @@ function App() {
 />
 
 
+ <Route path="/vacancies" element={<Vacancies />} />
+ <Route path="/home" element={<Home />} />
 <Route
   path="/recruitment"
   element={user ? <Recruitment /> : <Navigate to="/login" />}
@@ -186,3 +200,106 @@ function App() {
 }
 
 export default App;
+
+
+
+
+// import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+// import { useState } from "react";
+
+// /* ===== Pages ===== */
+// import Home from "./components/Home";
+// // import JobList from "./pages/JobList";
+// import CreateJob from "./components/CreateJob";
+// import Login from "./pages/Login";
+// import Signup from "./pages/Signup";
+// import HRLogin from "./pages/HRLogin";
+// import Recruitment from "./pages/Recruitment";
+// // import Employees from "./pages/Employees";
+// // import Applications from "./pages/Applications";
+// import Vacancies from "./pages/Vacancies";
+
+// /* ===== Components ===== */
+// import Layout from "./Layout";
+// import Dashboard from "./components/Dashboard";
+// // import Profile from "./components/Profile";
+// import HrDashboard from "./components/HrDashboard";
+
+// /* ===== Styles ===== */
+// import "./App.css";
+
+// export default function App() {
+//   const storedUser = localStorage.getItem("user");
+
+//   const [user, setUser] = useState(
+//     storedUser && storedUser !== "undefined" && storedUser !== "null"
+//       ? JSON.parse(storedUser)
+//       : null
+//   );
+
+//   return (
+//     <Router>
+//       <Routes>
+
+//         {/* ===== DEFAULT ===== */}
+//         <Route path="/" element={<Navigate to="/hr-login" />} />
+
+//         {/* ===== AUTH ROUTES ===== */}
+//         <Route
+//           path="/login"
+//           element={user ? <Navigate to="/dashboard" /> : <Login setUser={setUser} />}
+//         />
+
+//         <Route
+//           path="/signup"
+//           element={user ? <Navigate to="/dashboard" /> : <Signup setUser={setUser} />}
+//         />
+
+//         <Route
+//           path="/hr-login"
+//           element={<HRLogin setUser={setUser} />}
+//         />
+
+//         {/* ===== PROTECTED ROUTES (WITH LAYOUT) ===== */}
+//         <Route element={user ? <Layout /> : <Navigate to="/hr-login" />}>
+
+//           {/* Common */}
+//           <Route path="/dashboard" element={<Dashboard />} />
+//           {/* <Route path="/profile" element={<Profile />} /> */}
+
+//           {/* HR ONLY */}
+//           <Route
+//             path="/hr-dashboard"
+//             element={
+//               user?.role === "hr"
+//                 ? <HrDashboard />
+//                 : <Navigate to="/hr-login" />
+//             }
+//           />
+
+//           <Route
+//             path="/create-job"
+//             element={
+//               user?.role === "hr"
+//                 ? <CreateJob />
+//                 : <Navigate to="/hr-login" />
+//             }
+//           />
+
+//           <Route path="/recruitment" element={<Recruitment />} />
+//           {/* <Route path="/employees" element={<Employees />} /> */}
+//           {/* <Route path="/applications" element={<Applications />} /> */}
+//           <Route path="/vacancies" element={<Vacancies />} />
+//         </Route>
+
+//         {/* ===== PUBLIC ROUTES ===== */}
+//         <Route path="/home" element={<Home />} />
+//         {/* <Route path="/jobs" element={<JobList />} /> */}
+
+//         {/* ===== FALLBACK ===== */}
+//         <Route path="*" element={<Navigate to="/hr-login" />} />
+
+//       </Routes>
+//     </Router>
+//   );
+// }

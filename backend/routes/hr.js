@@ -6,11 +6,21 @@
 const express = require("express");
 const router = express.Router();
 const { createVacancy, getVacancies } = require("../controllers/hrController");
-
+const Vacancy = require("../models/Vacancy");
 // HR creates a vacancy
 router.post("/vacancies", createVacancy);
 
 // Employees can view vacancies
 router.get("/vacancies", getVacancies);
+
+router.delete("/vacancies/:id", async (req, res) => {
+  try {
+    await Vacancy.findByIdAndDelete(req.params.id);
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Delete failed" });
+  }
+});
 
 module.exports = router;

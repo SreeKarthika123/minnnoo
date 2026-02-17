@@ -12,7 +12,10 @@ const UserSchema = new mongoose.Schema({
   designation: { type: String }, 
    skills: { type: [String], default: [] },
    refreshToken:{type:String},
-
+ parsedResume: {
+    text: String,
+    // embedding: { type: [Number], default: [] }
+  }
 
 //    analysisProgress: {
 //   analyzed: { type: Number, default: 0 },
