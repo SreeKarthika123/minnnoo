@@ -162,13 +162,43 @@ exports.refreshToken = async (req, res) => {
 
 // const User = require("../models/User");
 
+// // Get profile
+// exports.getProfile = async (req, res) => {
+//   try {
+//     const user = await User.findById(req.params.id).select("-password");
+//     if (!user) return res.status(404).json({ message: "User not found" });
+//     res.json(user);
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
+
 // Get profile
 exports.getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    const user = await User.findById(req.params.id)
+      .select("-password")
+      .lean(); // ✅ IMPORTANT
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // ✅ Explicit response
+    res.json({
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      designation: user.designation,
+      skills: user.skills,
+      resume: user.resume,
+      atsAnalyzed: user.atsAnalyzed || false // 🔥 CRITICAL
+    });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -235,14 +265,13 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
-    let resumeUpdated = false;
+let resumeUpdated = false;
 
-    //  Resume upload
     if (req.file) {
       user.resume = `/uploads/${req.file.filename}`;
-      resumeUpdated = true;
+      user.atsAnalyzed = false; // 🔥 reset ATS
+      resumeUpdated = true;     // ✅ FIX
     }
-
     await user.save();
 
   

@@ -15,7 +15,23 @@ const UserSchema = new mongoose.Schema({
  parsedResume: {
     text: String,
     // embedding: { type: [Number], default: [] }
-  }
+  },
+
+  resumeEmbedding: {
+  type: [Number],
+  default: []
+},
+resumeKeywords: {
+  type: [String],
+  default: []
+}
+,
+
+atsAnalyzed: {
+  type: Boolean,
+  default: false
+}
+
 
 //    analysisProgress: {
 //   analyzed: { type: Number, default: 0 },

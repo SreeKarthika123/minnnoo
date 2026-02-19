@@ -1584,11 +1584,549 @@
 // }
 
 
-import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+// import { useEffect, useState } from "react";
+// import { useLocation } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 
-// 🔐 SAFE USER ID FETCH
+// // 🔐 SAFE USER ID FETCH
+// const getUserId = () => {
+//   try {
+//     const user = JSON.parse(localStorage.getItem("user"));
+//     return user?._id || user?.id || null;
+//   } catch {
+//     return null;
+//   }
+// };
+
+// export default function Recruitment({ sidebarOpen }) {
+
+//   const [vacancies, setVacancies] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState("");
+
+//   const userId = getUserId();
+
+//   const navigate = useNavigate();
+
+
+//   // 🔎 READ QUERY PARAM (?matched=true)
+//   const location = useLocation();
+//   const params = new URLSearchParams(location.search);
+//   const matchedOnly = params.get("matched") === "true";
+
+//   // ================= FETCH VACANCIES =================
+
+
+//   useEffect(() => {
+//   const fetchVacancies = async () => {
+//     if (!userId) return;
+
+//     setLoading(true);
+//     try {
+//       const res = await fetch("http://localhost:5000/api/hr/vacancies");
+//       const data = await res.json();
+
+//       const enriched = data.map((v, i) => {
+//         const existingScore = v.aiScores?.find(
+//           s => String(s.userId) === String(userId)
+//         );
+//         return {
+//           ...v,
+//           aiScore: existingScore || null,
+//           aiLoading: false,
+//           aiError: null,
+//           autoAnalyze: i < 3 // only first 3 vacancies for auto-analysis
+//         };
+//       });
+
+//       setVacancies(enriched);
+//     } catch (err) {
+//       console.error(err);
+//       setError("Error loading vacancies");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   fetchVacancies();
+// }, [userId]);
+
+// // ================= AUTO-ANALYZE FIRST N =================
+// useEffect(() => {
+//   vacancies.forEach(v => {
+//     if (v.autoAnalyze && !v.aiScore && !v.aiLoading) {
+//       checkScore(v._id);
+//     }
+//   });
+// }, [vacancies]);
+
+//   // useEffect(() => {
+//   //   const fetchVacancies = async () => {
+//   //     try {
+//   //       if (!userId) {
+//   //         setError("User not found. Please login again.");
+//   //         setLoading(false);
+//   //         return;
+//   //       }
+
+//   //       const res = await fetch("http://localhost:5000/api/hr/vacancies");
+//   //       const data = await res.json();
+
+//   //       // 🔥 ATTACH USER-SPECIFIC AI SCORE (FROM DB)
+//   //       const enriched = data.map(v => {
+//   //         const existingScore = v.aiScores?.find(
+//   //           s => String(s.userId) === String(userId)
+//   //         );
+
+//   //         return {
+//   //           ...v,
+//   //           aiScore: existingScore || null, // user-specific
+//   //           aiLoading: false,
+//   //           aiError: null
+//   //         };
+//   //       });
+
+//   //       setVacancies(enriched);
+//   //     } catch (err) {
+//   //       console.error(err);
+//   //       setError("Error loading vacancies");
+//   //     } finally {
+//   //       setLoading(false);
+//   //     }
+//   //   };
+
+//   //   fetchVacancies();
+//   // }, [userId]);
+
+//   // ================= CHECK / RECHECK SCORE =================
+//   // const checkScore = async (vacancyId) => {
+//   //   setVacancies(prev =>
+//   //     prev.map(v =>
+//   //       v._id === vacancyId ? { ...v, aiLoading: true } : v
+//   //     )
+//   //   );
+
+//   //   try {
+//   //     const res = await fetch("http://localhost:5000/api/ai/match-score", {
+//   //       method: "POST",
+//   //       headers: { "Content-Type": "application/json" },
+//   //       body: JSON.stringify({ userId, vacancyId })
+//   //     });
+
+//   //     const data = await res.json();
+
+//   //     setVacancies(prev =>
+//   //       prev.map(v =>
+//   //         v._id === vacancyId
+//   //           ? { ...v, aiScore: data, aiLoading: false }
+//   //           : v
+//   //       )
+//   //     );
+//   //   } catch (err) {
+//   //     setVacancies(prev =>
+//   //       prev.map(v =>
+//   //         v._id === vacancyId
+//   //           ? { ...v, aiError: "AI failed", aiLoading: false }
+//   //           : v
+//   //       )
+//   //     );
+//   //   }
+//   // };
+// const checkScore = async (vacancyId) => {
+//   console.log("Checking score for:", vacancyId, "user:", userId);
+
+//   setVacancies(prev =>
+//     prev.map(v =>
+//       v._id === vacancyId ? { ...v, aiLoading: true } : v
+//     )
+//   );
+
+//   try {
+//     const res = await fetch("http://localhost:5000/api/ai/match-score", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ userId, vacancyId })
+//     });
+
+//     const data = await res.json();
+//     console.log("AI response:", data);
+
+//     setVacancies(prev =>
+//       prev.map(v =>
+//         v._id === vacancyId
+//           ? { ...v, aiScore: data, aiLoading: false }
+//           : v
+//       )
+//     );
+//   } catch (err) {
+//     console.error("Check score failed:", err);
+//     setVacancies(prev =>
+//       prev.map(v =>
+//         v._id === vacancyId
+//           ? { ...v, aiError: "AI failed", aiLoading: false }
+//           : v
+//       )
+//     );
+//   }
+// };
+
+//   if (loading) return <div className="pt-24 text-center">Loading...</div>;
+//   if (error)
+//     return (
+//       <div className="pt-24 text-center text-red-500">{error}</div>
+//     );
+
+
+//     return (
+//       <div
+//   className={`min-h-screen bg-[#0b1020] px-6 pt-8 text-gray-200
+//   transition-all duration-300
+//   ${sidebarOpen ? "ml-60" : "ml-0"}`}
+// >
+
+//   {/* <div className="min-h-screen bg-[#0b1020] px-6 pt-8 ml-64 text-gray-200"> */}
+
+//     {/* Page Title */}
+//     <h2 className="text-2xl font-semibold mb-6">
+//       {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
+//     </h2>
+
+//     {/* Jobs Grid */}
+//     <div className="grid gap-6">
+//       {vacancies
+//         .filter(vac =>
+//           matchedOnly
+//             ? vac.aiScore && Number(vac.aiScore.score) >= 70
+//             : true
+//         )
+//         .sort((a, b) => {
+//           const scoreA = a.aiScore?.score ?? -1;
+//           const scoreB = b.aiScore?.score ?? -1;
+//           return scoreB - scoreA;
+//         })
+//         .map(vac => (
+//           <div
+//             key={vac._id}
+//             className="relative bg-[#11162a] border border-white/10
+//                        rounded-2xl p-6 shadow-lg hover:shadow-xl
+//                        transition"
+//           >
+
+//             {/* Match Badge */}
+//             {vac.aiScore && (
+//               <span
+//                 className={`absolute top-4 right-4 px-3 py-1 text-sm font-semibold rounded-full
+//                   ${
+//                     vac.aiScore.score >= 80
+//                       ? "bg-green-500/20 text-green-400"
+//                       : vac.aiScore.score >= 60
+//                       ? "bg-yellow-500/20 text-yellow-400"
+//                       : "bg-red-500/20 text-red-400"
+//                   }`}
+//               >
+//                 {vac.aiScore.score}% Match
+//               </span>
+//             )}
+
+//             {/* Job Info */}
+//             <h3 className="text-lg font-semibold text-white">
+//               {vac.title}
+//             </h3>
+
+//             <p className="text-gray-400 mt-2">
+//               {vac.jobDescription}
+//             </p>
+
+//             {/* Actions */}
+//             <div className="mt-4 flex items-center gap-3">
+//               <button
+//                 onClick={() => checkScore(vac._id)}
+//                 disabled={vac.aiLoading}
+//                 className="bg-indigo-600 hover:bg-indigo-700
+//                            disabled:opacity-60
+//                            text-white px-4 py-2 rounded-lg text-sm transition"
+//               >
+//                 {vac.aiLoading
+//                   ? "Analyzing..."
+//                   : vac.aiScore
+//                   ? "Re-check Score"
+//                   : "Check Score"}
+//               </button>
+
+//               {vac.aiScore && vac.aiScore.score >= 70 && (
+//                 <button
+//                   onClick={() => navigate(`/apply/${vac._id}`)}
+//                   className="bg-green-600 hover:bg-green-700
+//                              text-white px-4 py-2 rounded-lg text-sm transition"
+//                 >
+//                   Apply
+//                 </button>
+//               )}
+//             </div>
+
+//             {/* AI Result */}
+//             {vac.aiScore && (
+//               <div className="mt-5 bg-[#0b1020] border border-white/10
+//                               rounded-xl p-4 text-sm space-y-2">
+//                 <p>
+//                   <span className="font-semibold text-gray-300">
+//                     Score:
+//                   </span>{" "}
+//                   {vac.aiScore.score}%
+//                 </p>
+
+//                 <p>
+//                   <span className="font-semibold text-gray-300">
+//                     Matched Skills:
+//                   </span>{" "}
+//                   {vac.aiScore.matchedSkills?.join(", ") || "None"}
+//                 </p>
+
+//                 <p>
+//                   <span className="font-semibold text-gray-300">
+//                     Missing Skills:
+//                   </span>{" "}
+//                   {vac.aiScore.missingSkills?.join(", ") || "None"}
+//                 </p>
+
+//                 <p className="pt-2 text-gray-400">
+//                   <span className="font-semibold text-gray-300">
+//                     Summary:
+//                   </span>{" "}
+//                   {vac.aiScore.summary}
+//                 </p>
+//               </div>
+//             )}
+//           </div>
+//         ))}
+//     </div>
+//   </div>
+// );
+
+
+// //   return (
+// //     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
+// //       <h2 className="text-2xl font-bold mb-6">
+// //         {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
+// //       </h2>
+
+// //       <div className="grid gap-5">
+// //         {vacancies
+// //   // ✅ FILTER (matched page or all page)
+// //   .filter(vac =>
+// //     matchedOnly
+// //       ? vac.aiScore && Number(vac.aiScore.score) >= 70
+// //       : true
+// //   )
+
+// //   // 🔢 SORT BY SCORE (DESC)
+// //   .sort((a, b) => {
+// //     const scoreA = a.aiScore?.score ?? -1;
+// //     const scoreB = b.aiScore?.score ?? -1;
+// //     return scoreB - scoreA;
+// //   })
+
+// //   .map(vac => (
+// //  <div
+// //   key={vac._id}
+// //   className="bg-white p-5 rounded shadow relative"
+// // >
+
+
+// // {/* 
+// // {vacancies
+// //   .filter(vac =>
+// //     matchedOnly
+// //       ? vac.aiScore && Number(vac.aiScore.score) >= 70
+// //       : true
+// //   )
+// //   .map(vac => (
+// //     <div
+// //       key={vac._id}
+// //       className="bg-white p-5 rounded shadow"
+// //     > */}
+// //       <h3 className="text-lg font-semibold">{vac.title}</h3>
+// //       <p className="text-gray-700 mt-1">{vac.description}</p>
+
+
+// // {/* ✅ MATCH BADGE */}
+// // {vac.aiScore && (
+// //   <span
+// //     className={`absolute top-3 right-3 px-3 py-1 text-sm font-semibold rounded-full
+// //       ${
+// //         vac.aiScore.score >= 80
+// //           ? "bg-green-100 text-green-700"
+// //           : vac.aiScore.score >= 60
+// //           ? "bg-yellow-100 text-yellow-700"
+// //           : "bg-red-100 text-red-700"
+// //       }`}
+// //   >
+// //     {vac.aiScore.score}% Match
+// //   </span>
+// // )}
+
+
+// // <button
+// //   onClick={() => checkScore(vac._id)}
+// //   disabled={vac.aiLoading}
+// //   className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
+// // >
+// //   {vac.aiLoading
+// //     ? "Analyzing..."
+// //     : vac.aiScore
+// //     ? "Re-check Score"
+// //     : "Check Score"}
+// // </button>
+
+// // {/* ✅ APPLY BUTTON (only after score exists & matched) */}
+// // {vac.aiScore && vac.aiScore.score >= 70 && (
+// //   <button
+// //     onClick={() => navigate(`/apply/${vac._id}`)}
+// //     className="mt-3 ml-3 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
+// //   >
+// //     Apply
+// //   </button>
+// // )}
+
+// //       {/* <button
+// //         onClick={() => checkScore(vac._id)}
+// //         disabled={vac.aiLoading}
+// //         className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
+// //       >
+// //         {vac.aiLoading
+// //           ? "Analyzing..."
+// //           : vac.aiScore
+// //           ? "Re-check Score"
+// //           : "Check Score"}
+// //       </button> */}
+
+// //       {vac.aiScore && (
+
+        
+// //         <div className="mt-4 p-3 border rounded bg-gray-50">
+// //           <p><strong>Score:</strong> {vac.aiScore.score}%</p>
+// //           <p>
+// //             <strong>Matched Skills:</strong>{" "}
+// //             {vac.aiScore.matchedSkills?.join(", ") || "None"}
+// //           </p>
+// //           <p>
+// //             <strong>Missing Skills:</strong>{" "}
+// //             {vac.aiScore.missingSkills?.join(", ") || "None"}
+// //           </p>
+// //           <p className="mt-2">
+// //             <strong>Summary:</strong> {vac.aiScore.summary}
+// //           </p>
+// //         </div>
+// //       )}
+// //     </div>
+// //   ))}
+
+
+//         {/* {vacancies
+//           // ✅ CORE FIX: FILTER BY DB MATCH
+//           .filter(vac =>
+//             matchedOnly
+//               ? vac.aiScores?.some(
+//                   s => String(s.userId) === String(userId)
+//                 )
+//               : true
+//           )
+//           .map(vac => (
+//             <div
+//               key={vac._id}
+//               className="bg-white p-5 rounded shadow"
+//             >
+//               <h3 className="text-lg font-semibold">{vac.title}</h3>
+//               <p className="text-gray-700 mt-1">
+//                 {vac.description}
+//               </p>
+
+//               <button
+//                 onClick={() => checkScore(vac._id)}
+//                 disabled={vac.aiLoading}
+//                 className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
+//               >
+//                 {vac.aiLoading
+//                   ? "Analyzing..."
+//                   : vac.aiScore
+//                   ? "Re-check Score"
+//                   : "Check Score"}
+//               </button>
+
+//               {/* ✅ AI SCORE DISPLAY */}
+//               {/* {vac.aiScore && (
+//                 <div className="mt-4 p-3 border rounded bg-gray-50">
+//                   <p>
+//                     <strong>Score:</strong>{" "}
+//                     {vac.aiScore.score}%
+//                   </p>
+//                   <p>
+//                     <strong>Matched Skills:</strong>{" "}
+//                     {vac.aiScore.matchedSkills?.join(", ") ||
+//                       "None"}
+//                   </p>
+//                   <p>
+//                     <strong>Missing Skills:</strong>{" "}
+//                     {vac.aiScore.missingSkills?.join(", ") ||
+//                       "None"}
+//                   </p>
+//                   <p className="mt-2">
+//                     <strong>Summary:</strong>{" "}
+//                     {vac.aiScore.summary}
+//                   </p>
+//                 </div>
+//               )}
+//             </divrouter.post("/analyze-initial/:userId", async (req, res) => {
+//   const { userId } = req.params;
+
+//   try {
+//     // 🔍 Check if user already has ANY score
+//     const alreadyAnalyzed = await Vacancy.exists({
+//       "aiScores.userId": userId
+//     });
+
+//     if (alreadyAnalyzed) {
+//       return res.json({ message: "Initial analysis already done" });
+//     }
+
+//     // 🎯 Pick only 6 jobs (latest / most relevant)
+//     const jobs = await Vacancy.find()
+//       .sort({ createdAt: -1 })
+//       .limit(6);
+
+//     // 🔥 Fire-and-forget (NO await)
+//     jobs.forEach((job, index) => {
+//       setTimeout(() => {
+//         analyzeVacancyForUser(userId, job._id)
+//           .catch(err =>
+//             console.error("Initial analysis error:", err.message)
+//           );
+//       }, index * 3000); // 3s gap (safe for Gemini)
+//     });
+
+//     res.json({
+//       message: "Initial resume analysis started",
+//       jobsQueued: jobs.length
+//     });
+//   } catch (err) {
+//     console.error("Initial analysis failed:", err);
+//     res.status(500).json({ message: "Initial analysis failed" });
+//   }
+// });
+// >
+//           ))}  */}
+// //       </div>
+// //     </div>
+// //   );
+// // }
+// }
+
+
+
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+
+/* -------- SAFE USER ID -------- */
 const getUserId = () => {
   try {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -1599,524 +2137,292 @@ const getUserId = () => {
 };
 
 export default function Recruitment({ sidebarOpen }) {
-
   const [vacancies, setVacancies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState("");
+const [aiLoadingJobId, setAiLoadingJobId] = useState(null);
 
   const userId = getUserId();
-
   const navigate = useNavigate();
-
-
-  // 🔎 READ QUERY PARAM (?matched=true)
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const matchedOnly = params.get("matched") === "true";
 
-  // ================= FETCH VACANCIES =================
-
-
-  useEffect(() => {
+  /* ================= FETCH VACANCIES ================= */
   const fetchVacancies = async () => {
-    if (!userId) return;
-
-    setLoading(true);
     try {
+      setLoading(true);
       const res = await fetch("http://localhost:5000/api/hr/vacancies");
       const data = await res.json();
 
-      const enriched = data.map((v, i) => {
-        const existingScore = v.aiScores?.find(
+      const enriched = data.map(v => {
+        const scoreObj = v.atsScores?.find(
           s => String(s.userId) === String(userId)
         );
+
         return {
           ...v,
-          aiScore: existingScore || null,
-          aiLoading: false,
-          aiError: null,
-          autoAnalyze: i < 3 // only first 3 vacancies for auto-analysis
+          atsScore: scoreObj || null
         };
       });
 
       setVacancies(enriched);
     } catch (err) {
       console.error(err);
-      setError("Error loading vacancies");
+      setError("Failed to load vacancies");
     } finally {
       setLoading(false);
     }
   };
 
-  fetchVacancies();
-}, [userId]);
+  useEffect(() => {
+    if (userId) fetchVacancies();
+  }, [userId]);
 
-// ================= AUTO-ANALYZE FIRST N =================
-useEffect(() => {
-  vacancies.forEach(v => {
-    if (v.autoAnalyze && !v.aiScore && !v.aiLoading) {
-      checkScore(v._id);
+  /* ================= RUN ATS ANALYSIS ================= */
+  const analyzeResume = async () => {
+    try {
+      setAnalyzing(true);
+      await fetch(
+        `http://localhost:5000/api/ats/analyze-all/${userId}`,
+        { method: "POST" }
+      );
+      await fetchVacancies(); // refresh scores
+    } catch (err) {
+      console.error(err);
+      alert("ATS analysis failed");
+    } finally {
+      setAnalyzing(false);
     }
-  });
-}, [vacancies]);
+  };
 
-  // useEffect(() => {
-  //   const fetchVacancies = async () => {
-  //     try {
-  //       if (!userId) {
-  //         setError("User not found. Please login again.");
-  //         setLoading(false);
-  //         return;
-  //       }
 
-  //       const res = await fetch("http://localhost:5000/api/hr/vacancies");
-  //       const data = await res.json();
-
-  //       // 🔥 ATTACH USER-SPECIFIC AI SCORE (FROM DB)
-  //       const enriched = data.map(v => {
-  //         const existingScore = v.aiScores?.find(
-  //           s => String(s.userId) === String(userId)
-  //         );
-
-  //         return {
-  //           ...v,
-  //           aiScore: existingScore || null, // user-specific
-  //           aiLoading: false,
-  //           aiError: null
-  //         };
-  //       });
-
-  //       setVacancies(enriched);
-  //     } catch (err) {
-  //       console.error(err);
-  //       setError("Error loading vacancies");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchVacancies();
-  // }, [userId]);
-
-  // ================= CHECK / RECHECK SCORE =================
-  // const checkScore = async (vacancyId) => {
-  //   setVacancies(prev =>
-  //     prev.map(v =>
-  //       v._id === vacancyId ? { ...v, aiLoading: true } : v
-  //     )
-  //   );
-
-  //   try {
-  //     const res = await fetch("http://localhost:5000/api/ai/match-score", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ userId, vacancyId })
-  //     });
-
-  //     const data = await res.json();
-
-  //     setVacancies(prev =>
-  //       prev.map(v =>
-  //         v._id === vacancyId
-  //           ? { ...v, aiScore: data, aiLoading: false }
-  //           : v
-  //       )
-  //     );
-  //   } catch (err) {
-  //     setVacancies(prev =>
-  //       prev.map(v =>
-  //         v._id === vacancyId
-  //           ? { ...v, aiError: "AI failed", aiLoading: false }
-  //           : v
-  //       )
-  //     );
-  //   }
-  // };
-const checkScore = async (vacancyId) => {
-  console.log("Checking score for:", vacancyId, "user:", userId);
-
-  setVacancies(prev =>
-    prev.map(v =>
-      v._id === vacancyId ? { ...v, aiLoading: true } : v
-    )
-  );
-
+const handleCheckAIScore = async (vacancyId) => {
   try {
-    const res = await fetch("http://localhost:5000/api/ai/match-score", {
+    setAiLoadingJobId(vacancyId); // 🔥 show "Analyzing..."
+
+    const res = await fetch("http://localhost:5000/api/ai/analyze-one", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, vacancyId })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        userId,
+        vacancyId
+      })
     });
 
     const data = await res.json();
-    console.log("AI response:", data);
 
-    setVacancies(prev =>
-      prev.map(v =>
-        v._id === vacancyId
-          ? { ...v, aiScore: data, aiLoading: false }
-          : v
-      )
-    );
+    if (!res.ok) {
+      alert(data.error || "AI analysis failed");
+      return;
+    }
+
+    await fetchVacancies(); // refresh AI scores
+
   } catch (err) {
-    console.error("Check score failed:", err);
-    setVacancies(prev =>
-      prev.map(v =>
-        v._id === vacancyId
-          ? { ...v, aiError: "AI failed", aiLoading: false }
-          : v
-      )
-    );
+    console.error("AI analyze error:", err);
+    alert("AI analysis failed");
+  } finally {
+    setAiLoadingJobId(null); // 🔥 stop loading
   }
 };
 
+
+// const handleCheckAIScore = async (vacancyId) => {
+//   try {
+//     const res = await fetch("http://localhost:5000/api/ai/analyze-one", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json"
+//       },
+//       body: JSON.stringify({
+//         userId,
+//         vacancyId
+//       })
+//     });
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       alert(data.error || "AI analysis failed");
+//       return;
+//     }
+
+//     await fetchVacancies(); // refresh AI scores
+//   } catch (err) {
+//     console.error("AI analyze error:", err);
+//   }
+// };
+
+
+
+
+
   if (loading) return <div className="pt-24 text-center">Loading...</div>;
   if (error)
-    return (
-      <div className="pt-24 text-center text-red-500">{error}</div>
-    );
+    return <div className="pt-24 text-center text-red-500">{error}</div>;
 
+  return (
+    <div
+      className={`min-h-screen bg-[#0b1020] px-6 pt-8 text-gray-200
+      transition-all duration-300
+      ${sidebarOpen ? "ml-60" : "ml-0"}`}
+    >
+      {/* HEADER */}
+    {/* HEADER */}
+<div className="flex items-center justify-between mb-6">
+  <h2 className="text-2xl font-semibold">
+    {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
+  </h2>
+
+  {/* ATS ANALYZE BUTTON */}
+  {/* <button
+    onClick={analyzeResume}
+    disabled={analyzing}
+    className={`px-4 py-2 rounded-lg text-sm font-semibold
+      ${analyzing
+        ? "bg-gray-600 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+      }`}
+  >
+    {analyzing ? "Analyzing..." : "Analyze Resume"}
+  </button> */}
+</div>
+
+
+      {/* JOB LIST */}
+      <div className="grid gap-6">
+   {vacancies
+  .filter(v =>
+    matchedOnly ? v.atsScore?.score >= 30 : true
+  )
+  .sort(
+    (a, b) =>
+      (b.atsScore?.score || 0) -
+      (a.atsScore?.score || 0)
+  )
+  .map(vac => {
+
+    // ✅ FIX: define it HERE
+    const aiScoreForUser = vac.aiScores?.find(
+      s => String(s.userId) === String(userId)
+    );
 
     return (
       <div
-  className={`min-h-screen bg-[#0b1020] px-6 pt-8 text-gray-200
-  transition-all duration-300
-  ${sidebarOpen ? "ml-60" : "ml-0"}`}
->
+        key={vac._id}
+        className="relative bg-[#11162a] border border-white/10
+                   rounded-2xl p-6 shadow-lg"
+      >
+        {/* ATS SCORE BADGE */}
+   {vac.atsScore && (
+  <span
+    className={`absolute top-4 right-4 px-3 py-1
+      text-sm font-semibold rounded-full
+      ${
+        vac.atsScore.score >= 32
+          ? "bg-green-500/20 text-green-400"
+          : vac.atsScore.score >= 26
+          ? "bg-yellow-500/20 text-yellow-400"
+          : "bg-red-500/20 text-red-400"
+      }`}
+  >
+    {vac.atsScore.score >= 32
+      ? "High Match"
+      : vac.atsScore.score >= 26
+      ? "Partial Match"
+      : "Low Match"}
+  </span>
+)}
 
-  {/* <div className="min-h-screen bg-[#0b1020] px-6 pt-8 ml-64 text-gray-200"> */}
 
-    {/* Page Title */}
-    <h2 className="text-2xl font-semibold mb-6">
-      {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
-    </h2>
+        <h3 className="text-lg font-semibold">{vac.title}</h3>
+        <p className="text-gray-400 mt-2 line-clamp-3">
+          {vac.jobDescription}
+        </p>
 
-    {/* Jobs Grid */}
-    <div className="grid gap-6">
-      {vacancies
-        .filter(vac =>
-          matchedOnly
-            ? vac.aiScore && Number(vac.aiScore.score) >= 70
-            : true
-        )
-        .sort((a, b) => {
-          const scoreA = a.aiScore?.score ?? -1;
-          const scoreB = b.aiScore?.score ?? -1;
-          return scoreB - scoreA;
-        })
-        .map(vac => (
+        {/* APPLY BUTTON */}
+        
+
+
+{vac.atsScore?.score >= 32 && (
+  <button
+    onClick={() => handleCheckAIScore(vac._id)}
+    disabled={aiLoadingJobId === vac._id}
+    className={`mt-4 px-4 py-2 rounded-lg text-sm
+      ${
+        aiLoadingJobId === vac._id
+          ? "bg-gray-600 cursor-not-allowed"
+          : "bg-indigo-600 hover:bg-indigo-700"
+      }`}
+  >
+    {aiLoadingJobId === vac._id ? "🤖 Analyzing..." : "🤖 Check AI Match"}
+  </button>
+)}
+
+
+{vac.atsScore?.score >= 32 && (
+          <button
+            onClick={() => navigate(`/apply/${vac._id}`)}
+            className="mt-4 bg-green-600 hover:bg-green-700
+                       px-4 py-2 rounded-lg text-sm"
+          >
+            Apply
+          </button>
+        )}
+
+        {/* ATS DETAILS */}
+        {vac.atsScore && (
+          <div className="mt-4 text-sm text-gray-300">
+            {/* <strong>ATS Score:</strong> {vac.atsScore.score}% */}
+          </div>
+        )}
+
+  
+        {/* 🤖 AI SCORE — USER SAFE */}
+        {aiScoreForUser && (
           <div
-            key={vac._id}
-            className="relative bg-[#11162a] border border-white/10
-                       rounded-2xl p-6 shadow-lg hover:shadow-xl
-                       transition"
+            className="mt-4 bg-[#0b1020] border border-white/10
+                       rounded-xl p-4 text-sm space-y-2"
           >
 
-            {/* Match Badge */}
-            {vac.aiScore && (
-              <span
-                className={`absolute top-4 right-4 px-3 py-1 text-sm font-semibold rounded-full
-                  ${
-                    vac.aiScore.score >= 80
-                      ? "bg-green-500/20 text-green-400"
-                      : vac.aiScore.score >= 60
-                      ? "bg-yellow-500/20 text-yellow-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-              >
-                {vac.aiScore.score}% Match
-              </span>
-            )}
-
-            {/* Job Info */}
-            <h3 className="text-lg font-semibold text-white">
-              {vac.title}
-            </h3>
-
-            <p className="text-gray-400 mt-2">
-              {vac.jobDescription}
+            <p className="text-indigo-400 font-semibold">
+              🤖 AI Match Analysis
             </p>
 
-            {/* Actions */}
-            <div className="mt-4 flex items-center gap-3">
-              <button
-                onClick={() => checkScore(vac._id)}
-                disabled={vac.aiLoading}
-                className="bg-indigo-600 hover:bg-indigo-700
-                           disabled:opacity-60
-                           text-white px-4 py-2 rounded-lg text-sm transition"
-              >
-                {vac.aiLoading
-                  ? "Analyzing..."
-                  : vac.aiScore
-                  ? "Re-check Score"
-                  : "Check Score"}
-              </button>
+            <p>
+              <strong>AI Score:</strong> {aiScoreForUser.score}%
+            </p>
 
-              {vac.aiScore && vac.aiScore.score >= 70 && (
-                <button
-                  onClick={() => navigate(`/apply/${vac._id}`)}
-                  className="bg-green-600 hover:bg-green-700
-                             text-white px-4 py-2 rounded-lg text-sm transition"
-                >
-                  Apply
-                </button>
-              )}
-            </div>
+            {aiScoreForUser.matchedSkills?.length > 0 && (
+              <p className="text-green-400">
+                <strong>Matched Skills:</strong>{" "}
+                {aiScoreForUser.matchedSkills.join(", ")}
+              </p>
+            )}
 
-            {/* AI Result */}
-            {vac.aiScore && (
-              <div className="mt-5 bg-[#0b1020] border border-white/10
-                              rounded-xl p-4 text-sm space-y-2">
-                <p>
-                  <span className="font-semibold text-gray-300">
-                    Score:
-                  </span>{" "}
-                  {vac.aiScore.score}%
-                </p>
+            {aiScoreForUser.missingSkills?.length > 0 && (
+              <p className="text-red-400">
+                <strong>Missing Skills:</strong>{" "}
+                {aiScoreForUser.missingSkills.join(", ")}
+              </p>
+            )}
 
-                <p>
-                  <span className="font-semibold text-gray-300">
-                    Matched Skills:
-                  </span>{" "}
-                  {vac.aiScore.matchedSkills?.join(", ") || "None"}
-                </p>
-
-                <p>
-                  <span className="font-semibold text-gray-300">
-                    Missing Skills:
-                  </span>{" "}
-                  {vac.aiScore.missingSkills?.join(", ") || "None"}
-                </p>
-
-                <p className="pt-2 text-gray-400">
-                  <span className="font-semibold text-gray-300">
-                    Summary:
-                  </span>{" "}
-                  {vac.aiScore.summary}
-                </p>
-              </div>
+            {aiScoreForUser.summary && (
+              <p className="text-gray-400">
+                {aiScoreForUser.summary}
+              </p>
             )}
           </div>
-        ))}
+        )}
+      </div>
+    );
+  })}
+
+      </div>
     </div>
-  </div>
-);
-
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">
-//         {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
-//       </h2>
-
-//       <div className="grid gap-5">
-//         {vacancies
-//   // ✅ FILTER (matched page or all page)
-//   .filter(vac =>
-//     matchedOnly
-//       ? vac.aiScore && Number(vac.aiScore.score) >= 70
-//       : true
-//   )
-
-//   // 🔢 SORT BY SCORE (DESC)
-//   .sort((a, b) => {
-//     const scoreA = a.aiScore?.score ?? -1;
-//     const scoreB = b.aiScore?.score ?? -1;
-//     return scoreB - scoreA;
-//   })
-
-//   .map(vac => (
-//  <div
-//   key={vac._id}
-//   className="bg-white p-5 rounded shadow relative"
-// >
-
-
-// {/* 
-// {vacancies
-//   .filter(vac =>
-//     matchedOnly
-//       ? vac.aiScore && Number(vac.aiScore.score) >= 70
-//       : true
-//   )
-//   .map(vac => (
-//     <div
-//       key={vac._id}
-//       className="bg-white p-5 rounded shadow"
-//     > */}
-//       <h3 className="text-lg font-semibold">{vac.title}</h3>
-//       <p className="text-gray-700 mt-1">{vac.description}</p>
-
-
-// {/* ✅ MATCH BADGE */}
-// {vac.aiScore && (
-//   <span
-//     className={`absolute top-3 right-3 px-3 py-1 text-sm font-semibold rounded-full
-//       ${
-//         vac.aiScore.score >= 80
-//           ? "bg-green-100 text-green-700"
-//           : vac.aiScore.score >= 60
-//           ? "bg-yellow-100 text-yellow-700"
-//           : "bg-red-100 text-red-700"
-//       }`}
-//   >
-//     {vac.aiScore.score}% Match
-//   </span>
-// )}
-
-
-// <button
-//   onClick={() => checkScore(vac._id)}
-//   disabled={vac.aiLoading}
-//   className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-// >
-//   {vac.aiLoading
-//     ? "Analyzing..."
-//     : vac.aiScore
-//     ? "Re-check Score"
-//     : "Check Score"}
-// </button>
-
-// {/* ✅ APPLY BUTTON (only after score exists & matched) */}
-// {vac.aiScore && vac.aiScore.score >= 70 && (
-//   <button
-//     onClick={() => navigate(`/apply/${vac._id}`)}
-//     className="mt-3 ml-3 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-//   >
-//     Apply
-//   </button>
-// )}
-
-//       {/* <button
-//         onClick={() => checkScore(vac._id)}
-//         disabled={vac.aiLoading}
-//         className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-//       >
-//         {vac.aiLoading
-//           ? "Analyzing..."
-//           : vac.aiScore
-//           ? "Re-check Score"
-//           : "Check Score"}
-//       </button> */}
-
-//       {vac.aiScore && (
-
-        
-//         <div className="mt-4 p-3 border rounded bg-gray-50">
-//           <p><strong>Score:</strong> {vac.aiScore.score}%</p>
-//           <p>
-//             <strong>Matched Skills:</strong>{" "}
-//             {vac.aiScore.matchedSkills?.join(", ") || "None"}
-//           </p>
-//           <p>
-//             <strong>Missing Skills:</strong>{" "}
-//             {vac.aiScore.missingSkills?.join(", ") || "None"}
-//           </p>
-//           <p className="mt-2">
-//             <strong>Summary:</strong> {vac.aiScore.summary}
-//           </p>
-//         </div>
-//       )}
-//     </div>
-//   ))}
-
-
-        {/* {vacancies
-          // ✅ CORE FIX: FILTER BY DB MATCH
-          .filter(vac =>
-            matchedOnly
-              ? vac.aiScores?.some(
-                  s => String(s.userId) === String(userId)
-                )
-              : true
-          )
-          .map(vac => (
-            <div
-              key={vac._id}
-              className="bg-white p-5 rounded shadow"
-            >
-              <h3 className="text-lg font-semibold">{vac.title}</h3>
-              <p className="text-gray-700 mt-1">
-                {vac.description}
-              </p>
-
-              <button
-                onClick={() => checkScore(vac._id)}
-                disabled={vac.aiLoading}
-                className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-              >
-                {vac.aiLoading
-                  ? "Analyzing..."
-                  : vac.aiScore
-                  ? "Re-check Score"
-                  : "Check Score"}
-              </button>
-
-              {/* ✅ AI SCORE DISPLAY */}
-              {/* {vac.aiScore && (
-                <div className="mt-4 p-3 border rounded bg-gray-50">
-                  <p>
-                    <strong>Score:</strong>{" "}
-                    {vac.aiScore.score}%
-                  </p>
-                  <p>
-                    <strong>Matched Skills:</strong>{" "}
-                    {vac.aiScore.matchedSkills?.join(", ") ||
-                      "None"}
-                  </p>
-                  <p>
-                    <strong>Missing Skills:</strong>{" "}
-                    {vac.aiScore.missingSkills?.join(", ") ||
-                      "None"}
-                  </p>
-                  <p className="mt-2">
-                    <strong>Summary:</strong>{" "}
-                    {vac.aiScore.summary}
-                  </p>
-                </div>
-              )}
-            </divrouter.post("/analyze-initial/:userId", async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    // 🔍 Check if user already has ANY score
-    const alreadyAnalyzed = await Vacancy.exists({
-      "aiScores.userId": userId
-    });
-
-    if (alreadyAnalyzed) {
-      return res.json({ message: "Initial analysis already done" });
-    }
-
-    // 🎯 Pick only 6 jobs (latest / most relevant)
-    const jobs = await Vacancy.find()
-      .sort({ createdAt: -1 })
-      .limit(6);
-
-    // 🔥 Fire-and-forget (NO await)
-    jobs.forEach((job, index) => {
-      setTimeout(() => {
-        analyzeVacancyForUser(userId, job._id)
-          .catch(err =>
-            console.error("Initial analysis error:", err.message)
-          );
-      }, index * 3000); // 3s gap (safe for Gemini)
-    });
-
-    res.json({
-      message: "Initial resume analysis started",
-      jobsQueued: jobs.length
-    });
-  } catch (err) {
-    console.error("Initial analysis failed:", err);
-    res.status(500).json({ message: "Initial analysis failed" });
-  }
-});
->
-          ))}  */}
-//       </div>
-//     </div>
-//   );
-// }
+  );
 }

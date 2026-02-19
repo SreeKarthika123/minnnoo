@@ -23,4 +23,15 @@ router.delete("/vacancies/:id", async (req, res) => {
   }
 });
 
+router.get("/vacancies/:id", async (req, res) => {
+  try {
+    const vacancy = await Vacancy.findById(req.params.id);
+    if (!vacancy) {
+      return res.status(404).json({ message: "Vacancy not found" });
+    }
+    res.json(vacancy);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router;

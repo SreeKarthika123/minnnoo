@@ -532,6 +532,8 @@ import { useNavigate } from "react-router-dom";
 export default function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
+const [isAnalyzing, setIsAnalyzing] = useState(false);
+const [atsAnalyzed, setAtsAnalyzed] = useState(false);
 
   const [profile, setProfile] = useState({
     name: "",
@@ -548,38 +550,116 @@ export default function Profile() {
   
 
 
+// useEffect(() => {
+//   if (!user) return navigate("/login");
+
+//   // Fetch profile only once
+//   const fetchProfile = async () => {
+//     try {
+//       const res = await fetch(`http://localhost:5000/api/auth/profile/${user.id}`);
+//       const data = await res.json();
+
+//       setProfile({
+//         name: data.name || "",
+//         email: data.email || "",
+//         phone: data.phone || "",
+//         designation: data.designation || "",
+//         skills: data.skills || "",
+//         resume: data.resume || null,
+//       });
+//     } catch (err) {
+//       console.error(err);
+//     }
+//   };
+
+//   fetchProfile();
+// }, []); 
+
+
+
+
 useEffect(() => {
   if (!user) return navigate("/login");
 
-  // Fetch profile only once
   const fetchProfile = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/auth/profile/${user.id}`);
+      const res = await fetch(
+        `http://localhost:5000/api/auth/profile/${user.id}`
+      );
       const data = await res.json();
 
-      setProfile({
+      setProfile(prev => ({
+        ...prev,
         name: data.name || "",
         email: data.email || "",
         phone: data.phone || "",
         designation: data.designation || "",
-        skills: data.skills || "",
+        skills: data.skills || [],
         resume: data.resume || null,
-      });
+      }));
+
+      setAtsAnalyzed(data.atsAnalyzed); // ✅ ADD HERE
+
     } catch (err) {
       console.error(err);
     }
   };
 
   fetchProfile();
-}, []); 
+}, []);
+
+// const handleAnalyze = async () => {
+//   try {
+//     setIsAnalyzing(true);
+
+//     await fetch(
+//       `http://localhost:5000/api/ats/analyze-all/${user.id}`,
+//       { method: "POST" }
+//     );
+
+//     alert("Resume analysis Completed");
+//     navigate("/dashboard");
+//   } catch (err) {
+//     console.error(err);
+//     alert("Failed to start analysis");
+//   } finally {
+//     setIsAnalyzing(false);
+//   }
+// };
+
+
+const handleAnalyze = async () => {
+  try {
+    setIsAnalyzing(true);
+
+    await fetch(
+      `http://localhost:5000/api/ats/analyze-all/${user.id}`,
+      { method: "POST" }
+    );
+
+    setAtsAnalyzed(true); // ✅ disable button
+    alert("Resume analysis completed 🎯");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to analyze resume");
+  } finally {
+    setIsAnalyzing(false);
+  }
+};
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
+  // const handleFileChange = (e) => {
+  //   setResumeFile(e.target.files[0]);
+  // };
+
   const handleFileChange = (e) => {
-    setResumeFile(e.target.files[0]);
-  };
+  setResumeFile(e.target.files[0]);
+  setAtsAnalyzed(false); // 🔥 resume changed → allow analyze again
+};
+
 
   const handleSkillKey = (e) => {
     if (e.key === "Enter" && skillInput.trim() !== "") {
@@ -624,10 +704,24 @@ useEffect(() => {
       return;
     }
 
+    // setProfile(prev => ({
+    //   ...prev,
+    //   resume: data.user.resume || prev.resume
+    // }));
+
+
     setProfile(prev => ({
-      ...prev,
-      resume: data.user.resume || prev.resume
-    }));
+  ...prev,
+  name: data.user.name || prev.name,
+  email: data.user.email || prev.email,
+  phone: data.user.phone || prev.phone,
+  designation: data.user.designation || prev.designation,
+  skills: data.user.skills || prev.skills,
+  resume: data.user.resume || prev.resume
+}));
+setAtsAnalyzed(data.user.atsAnalyzed);
+
+// setAtsAnalyzed(data.user.atsAnalyzed); // ✅ ADD HERE
 
     // // 🔥 AUTO ANALYZE AFTER RESUME UPLOAD
     // if (isNewResume) {
@@ -637,7 +731,7 @@ useEffect(() => {
     //   );
     // }
     alert("Profile updated successfully ✅");
-navigate("/dashboard");
+// navigate("/dashboard");
 
 
     // alert("Profile updated & jobs analyzed 🎯");
@@ -750,26 +844,49 @@ return (
             Resume
           </label>
 
-          <input
+        
+
+        </div>
+
+
+  <input
             type="file"
             onChange={handleFileChange}
             className="text-sm text-gray-400"
           />
 
-          {profile.resume && (
-            <p className="text-sm text-gray-400 mt-2">
-              Current Resume:{" "}
-              <a
-                href={`http://localhost:5000${profile.resume}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-400 hover:underline"
-              >
-                View
-              </a>
-            </p>
-          )}
-        </div>
+
+                <a
+        href={`http://localhost:5000${profile.resume}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-indigo-400 hover:text-indigo-300
+                   text-sm underline"
+      >
+        View Resume
+      </a>
+
+
+        {profile.resume && (
+  <button
+    type="button"
+    onClick={handleAnalyze}
+    disabled={isAnalyzing || atsAnalyzed}
+    className={`w-full font-medium py-2 rounded-lg transition
+      ${
+        atsAnalyzed
+          ? "bg-gray-600 cursor-not-allowed"
+          : "bg-green-600 hover:bg-green-700"
+      }`}
+  >
+    {isAnalyzing
+      ? "Analyzing Resume..."
+      : atsAnalyzed
+      ? "Resume Already Analyzed"
+      : "Analyze Resume"}
+  </button>
+)}
+
 
         {/* Submit */}
         <button

@@ -137,6 +137,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     // { name: "Time", path: "/time" },
     // { name: "Vibe", path: "/vibe" },
     { name: "Recruitment", path: "/recruitment" },
+      { name: "Top Employees", path: "/top-emp" }
     // { name: "Helpdesk", path: "/helpdesk" },
   ];
 
