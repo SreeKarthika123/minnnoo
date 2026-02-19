@@ -31,6 +31,18 @@ export default function Sidebarhr() {
           Vacancies
         </NavLink>
 
+
+        <NavLink
+  to="/top-employees"
+  className="block text-gray-300 hover:text-blue-400"
+>
+  Top Employees
+</NavLink>
+
+
+
+
+
         <button
           onClick={logout}
           className="text-red-400 hover:text-red-500 mt-8"

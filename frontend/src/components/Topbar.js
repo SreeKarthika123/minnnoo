@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
  
 export default function Topbar({ setSidebarOpen }) {
 
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
- 
+  // const [open, setOpen] = useState(false);
+ const [open, setOpen] = useState(false);
+const [showNotifications, setShowNotifications] = useState(false);
+const [notifications, setNotifications] = useState([]);
+
 //   const user = JSON.parse(localStorage.getItem("user"));
  
 let user = null;
@@ -19,6 +22,31 @@ try {
   console.error("Invalid user in localStorage", err);
   user = null;
 }
+
+
+
+useEffect(() => {
+
+  const userId = user?._id || user?.id;
+if (!userId) return;
+
+  // if (!user?._id) return;
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/notifications/user/${userId}`
+      );
+      const data = await res.json();
+      setNotifications(data);
+    } catch (err) {
+      console.error("Notification fetch error", err);
+    }
+  };
+
+  fetchNotifications();
+}, [user]);
+
  return (
   <div className="bg-[#0b1020] px-6 py-3 border-b border-white/10
                   flex justify-between items-center sticky top-0 z-20">
@@ -54,10 +82,88 @@ try {
         </span> 👋
       </span>
 
+
+
+      
+{/* Notification Bell */}
+<div className="relative">
+  <button
+    onClick={() => setShowNotifications(prev => !prev)}
+    className="text-xl text-gray-300 hover:text-white transition relative"
+  >
+    🔔
+    {notifications.length > 0 && (
+      <span
+        className="absolute -top-1 -right-1
+                   bg-red-500 text-xs text-white
+                   rounded-full px-1"
+      >
+        {notifications.length}
+      </span>
+    )}
+  </button>
+
+  {/* Notification Dropdown */}
+  {showNotifications && (
+    <div
+      className="absolute right-0 mt-3 w-96
+                 bg-[#11162a]
+                 border border-blue-400/20
+                 rounded-xl shadow-xl p-4 z-50"
+    >
+      <h3 className="text-blue-400 font-semibold mb-3">
+        Notifications
+      </h3>
+
+      {notifications.length === 0 ? (
+        <p className="text-sm text-gray-400">
+          No notifications
+        </p>
+      ) : (
+        notifications.map((n) => (
+          <div
+            key={n._id}
+            className="flex justify-between items-center
+                       bg-black/40 p-3 rounded mb-2"
+          >
+            <div>
+              <p className="text-sm">{n.message}</p>
+              <p className="text-xs text-gray-400">
+                Job: {n.vacancyId?.title}
+              </p>
+            </div>
+
+           <button
+  onClick={async () => {
+    await fetch(
+      `http://localhost:5000/api/notifications/read/${n._id}`,
+      { method: "PATCH" }
+    );
+
+    // remove from UI immediately
+    setNotifications(prev =>
+      prev.filter(x => x._id !== n._id)
+    );
+
+    navigate(`/recruitment/${n.vacancyId?._id}`);
+    setShowNotifications(false);
+  }}
+  className="text-sm bg-green-600 px-3 py-1 rounded"
+>
+  Apply
+</button>
+
+          </div>
+        ))
+      )}
+    </div>
+  )}
+</div>
+
       {/* Notification */}
-      <button className="text-xl text-gray-300 hover:text-white transition">
+      {/* <button className="text-xl text-gray-300 hover:text-white transition">
         🔔
-      </button>
+      </button> */}
 
       {/* Profile */}
       <div className="relative">

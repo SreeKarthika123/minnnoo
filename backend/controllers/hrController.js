@@ -186,36 +186,50 @@ exports.createVacancy = async (req, res) => {
       vacancy
     });
 
-    // 3️Background AI processing (NON-BLOCKING)
-    setImmediate(async () => {
-      const users = await User.find({
-        resume: { $exists: true, $ne: null }
-      }).select("_id");
+    // // 3️Background AI processing (NON-BLOCKING)
+    // setImmediate(async () => {
+    //   const users = await User.find({
+    //     resume: { $exists: true, $ne: null }
+    //   }).select("_id");
 
-      for (const user of users) {
-        try {
-          await axios.post(
-            "http://localhost:5000/api/ai/match-score",
-            {
-              userId: user._id.toString(),
-              vacancyId: vacancy._id.toString()
-            }
-          );
+   setImmediate(async () => {
+  const users = await User.find({
+    resume: { $exists: true, $ne: null }
+  }).select("_id");
 
-          // delay to avoid Gemini / AI rate limit
-          await new Promise(r => setTimeout(r, 1200));
+  for (const user of users) {
+    try {
+      // 🤖 AI SCORE
+      // await axios.post(
+      //   "http://localhost:5000/api/ai/match-score",
+      //   {
+      //     userId: user._id.toString(),
+      //     vacancyId: vacancy._id.toString()
+      //   }
+      // );
 
-        } catch (err) {
-          console.error(
-            "AI trigger failed:",
-            user._id.toString(),
-            err.message
-          );
+      // 📄 ATS SCORE (🔥 THIS WAS MISSING)
+      await axios.post(
+        "http://localhost:5000/api/ats/analyze-one",
+        {
+          userId: user._id.toString(),
+          vacancyId: vacancy._id.toString()
         }
-      }
+      );
 
-      console.log(" AI analysis completed for vacancy:", vacancy._id);
-    });
+      await new Promise(r => setTimeout(r, 1200));
+    } catch (err) {
+      console.error(
+        "Analysis failed:",
+        user._id.toString(),
+        err.message
+      );
+    }
+  }
+
+  console.log("AI + ATS completed for vacancy:", vacancy._id);
+});
+
 
   } catch (err) {
     console.error("Create vacancy error:", err);

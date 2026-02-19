@@ -105,9 +105,12 @@ import CreateJob from "./components/CreateJob";
 import Profile from "./components/Profile";
 import HRLogin from "./pages/HRLogin";
 import Home from "./components/Home";
+import ApplyJob from "./components/ApplyJob";
 import Vacancies from "./pages/Vacancies";
 import HrDashboard from "./components/HrDashboard";
+import TopEmployeesHR from "./components/TopEmployeesHR";
 import Recruitment from "./pages/Recruitment";
+import TopEmployees from "./components/TopEmployees";
 // import mongoose from "mongoose";
 // import MatchedApplications from "./components/MatchedApplications";
 function App() {
@@ -192,6 +195,25 @@ function App() {
 <Route
   path="/recruitment"
   element={user ? <Recruitment /> : <Navigate to="/login" />}
+
+
+/>
+
+<Route
+  path="/top-employees"
+  element={user ? <TopEmployeesHR/> : <Navigate to="/login" />}
+/>
+
+<Route
+  path="/recruitment/:vacancyId"
+  element={<ApplyJob />}
+/>
+
+
+
+<Route
+  path="/top-emp"
+  element={user ? <TopEmployees/> : <Navigate to="/login" />}
 />
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
