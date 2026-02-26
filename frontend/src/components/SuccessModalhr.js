@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { CheckCircle2, X } from "lucide-react";
 
-export default function SuccessModal({ onClose }) {
+export default function SuccessModalhr({ onClose }) {
   const btnRef = useRef();
   useEffect(() => { btnRef.current?.focus(); }, []);
 
@@ -12,7 +12,7 @@ export default function SuccessModal({ onClose }) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-blue-100 px-8 py-10 text-center space-y-5"
+        className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-emerald-100 px-8 py-10 text-center space-y-5"
         style={{ animation: "popUp 0.3s cubic-bezier(0.34,1.56,0.64,1) both" }}
       >
         {/* Close */}
@@ -32,8 +32,8 @@ export default function SuccessModal({ onClose }) {
 
         {/* Title */}
         <div>
-          <h2 className="text-xl font-extrabold text-gray-800">Job Published Successfully</h2>
-          <p className="text-gray-400 text-sm mt-1.5">Your job posting is now live internally.</p>
+          <h2 className="text-xl font-extrabold text-gray-800">Applied Successfully!</h2>
+          <p className="text-gray-400 text-sm mt-1.5">Your application has been submitted. Good luck! 🚀</p>
         </div>
 
         {/* Divider */}
@@ -46,8 +46,8 @@ export default function SuccessModal({ onClose }) {
           className="w-full py-2.5 rounded-xl text-sm font-bold text-white
                      transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
           style={{
-            background: "linear-gradient(135deg,#2563eb,#7c3aed)",
-            boxShadow: "0 4px 14px rgba(37,99,235,0.25)",
+            background: "linear-gradient(135deg,#059669,#3b82f6)",
+            boxShadow: "0 4px 14px rgba(5,150,105,0.25)",
           }}
         >
           Done

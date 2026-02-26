@@ -1,2130 +1,7 @@
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-
-//   useEffect(() => {
-//     fetch("http://localhost:5000/api/hr/vacancies")
-//       .then((res) => res.json())
-//       .then((data) => setVacancies(data))
-//       .catch((err) => console.error(err));
-//   }, []);
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-4">
-//           {vacancies.map((vacancy) => (
-//             <div key={vacancy._id} className="bg-white p-4 rounded shadow">
-//               <h4 className="font-semibold">{vacancy.title}</h4>
-//               <p>{vacancy.description}</p>
-//               <p className="text-sm text-gray-500">
-//                 Location: {vacancy.location || "N/A"} | Salary: {vacancy.salary || "N/A"}
-//               </p>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-
-
-// import { useEffect, useState } from "react";
- 
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
- 
-//   const user = JSON.parse(localStorage.getItem("user"));
- 
-//   // Fetch vacancies + AI score
-//   useEffect(() => {
-//     const fetchVacanciesWithScore = async () => {
-//       try {
-//         const res = await fetch(
-//           "http://localhost:5000/api/hr/vacancies"
-//         );
-//         const data = await res.json();
- 
-//         const scoredVacancies = await Promise.all(
-//           data.map(async (vac) => {
-//             const scoreRes = await fetch(
-//               "http://localhost:5000/api/ai/match-score",
-//               {
-//                 method: "POST",
-//                 headers: {
-//                   "Content-Type": "application/json",
-//                 },
-//                 body: JSON.stringify({
-//                   userId: user.id,
-//                   vacancyId: vac._id,
-//                 }),
-//               }
-//             );
- 
-//             const scoreData = await scoreRes.json();
- 
-//             return {
-//               ...vac,
-//               score: scoreData.score,
-//               missingSkills: scoreData.missingSkills || [],
-//               summary: scoreData.summary || "",
-//             };
-//           })
-//         );
- 
-//         setVacancies(scoredVacancies);
-//       } catch (err) {
-//         console.error(err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
- 
-//     if (user) fetchVacanciesWithScore();
-//   }, [user]);
- 
-//   if (loading) {
-//     return (
-//       <div className="pt-24 text-center text-gray-500">
-//         Analyzing jobs with your resume...
-//       </div>
-//     );
-//   }
- 
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
- 
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div
-//               key={vac._id}
-//               className="bg-white p-5 rounded-lg shadow"
-//             >
-//               <h3 className="text-lg font-semibold">
-//                 {vac.title}
-//               </h3>
- 
-//               <p className="mt-2 text-gray-700">
-//                 {vac.description}
-//               </p>
- 
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
- 
-//               {/* AI Match Score */}
-//               <div className="mt-4">
-//                 <p className="font-semibold text-green-600">
-//                   Match Score: {vac.score}%
-//                 </p>
- 
-//                 {vac.missingSkills.length > 0 && (
-//                   <p className="text-sm text-red-500">
-//                     Missing Skills:{" "}
-//                     {vac.missingSkills.join(", ")}
-//                   </p>
-//                 )}
- 
-//                 {vac.summary && (
-//                   <p className="text-sm italic text-gray-600 mt-1">
-//                     {vac.summary}
-//                   </p>
-//                 )}
-//               </div>
- 
-//               {/* Apply Button */}
-//               <div className="mt-4">
-//                 {vac.score >= 70 ? (
-//                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-//                     Apply Now
-//                   </button>
-//                 ) : (
-//                   <p className="text-sm text-gray-400">
-//                     Improve skills to apply
-//                   </p>
-//                 )}
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
- 
-
-
-// // import { useEffect, useState } from "react";
-
-// // export default function Recruitment() {
-// //   const [vacancies, setVacancies] = useState([]);
-// //   const [loading, setLoading] = useState(false);
-
-// //   useEffect(() => {
-// //     fetch("http://localhost:5000/api/hr/vacancies")
-// //       .then(res => res.json())
-// //       .then(data => setVacancies(data))
-// //       .catch(err => console.error(err));
-// //   }, []);
-
-// //   const checkEligibility = async (vacancyId) => {
-// //     setLoading(true);
-// //     const user = JSON.parse(localStorage.getItem("user"));
-
-// //     try {
-// //       const res = await fetch("http://localhost:5000/api/match/evaluate", {
-// //         method: "POST",
-// //         headers: { "Content-Type": "application/json" },
-// //         body: JSON.stringify({ userId: user._id, vacancyId })
-// //       });
-
-// //       const data = await res.json();
-// //       alert(`Match Score: ${data.matchPercentage}%\nStatus: ${data.status}`);
-// //     } catch (err) {
-// //       console.error("Eligibility error:", err);
-// //       alert("Failed to check eligibility");
-// //     } finally {
-// //       setLoading(false);
-// //     }
-// //   };
-
-// //   return (
-// //     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-// //       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-// //       {vacancies.length === 0 ? (
-// //         <p>No vacancies available currently.</p>
-// //       ) : (
-// //         <div className="grid gap-4">
-// //           {vacancies.map((vacancy) => (
-// //             <div key={vacancy._id} className="bg-white p-4 rounded shadow">
-// //               <h4 className="font-semibold">{vacancy.title}</h4>
-// //               <p>{vacancy.description}</p>
-// //               <p className="text-sm text-gray-500">
-// //                 Location: {vacancy.location || "N/A"} | Salary: {vacancy.salary || "N/A"}
-// //               </p>
-// //               <button
-// //                 onClick={() => checkEligibility(vacancy._id)}
-// //                 className="mt-2 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-// //                 disabled={loading}
-// //               >
-// //                 {loading ? "Checking..." : "Check Eligibility"}
-// //               </button>
-// //             </div>
-// //           ))
-
-// //         </div>
-// //       )}
-// //     </div>
-// //   );
-// // }
-
-
-
-
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   console.log("DEBUG - User from localStorage:", user); 
-//   useEffect(() => {
-//     const fetchVacanciesWithScore = async () => {
-//       try {
-//         // 1️⃣ Fetch vacancies
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         const data = await res.json();
-
-//         // 2️⃣ Fetch AI match score for each vacancy
-//         const scoredVacancies = await Promise.all(
-//           data.map(async (vac) => {
-//             const scoreRes = await fetch(
-//               "http://localhost:5000/api/ai/match-score",
-//               {
-//                 method: "POST",
-//                 headers: { "Content-Type": "application/json" },
-//                 body: JSON.stringify({
-//                   userId: user._id || user.id,       // Must be _id
-//                   vacancyId: vac._id,
-//                 }),
-//               }
-//             );
-
-//             const scoreData = await scoreRes.json();
-//               //  console.log("DEBUG - AI response:", scoreData);
-
-//             return {
-//               ...vac,
-//               score: scoreData.score || 0,
-//               missingSkills: scoreData.missingSkills || [],
-//               summary: scoreData.summary || "",
-//             };
-//           })
-//         );
-
-//         setVacancies(scoredVacancies);
-//       } catch (err) {
-//         console.error("Error fetching vacancies:", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     if (user) fetchVacanciesWithScore();
-//   }, [user]);
-
-//   if (loading) {
-//     return <div className="pt-24 text-center">Analyzing jobs with your resume...</div>;
-//   }
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div key={vac._id} className="bg-white p-5 rounded-lg shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               <div className="mt-4">
-//                 <p className="font-semibold text-green-600">Match Score: {vac.score}%</p>
-//                 {vac.missingSkills.length > 0 && (
-//                   <p className="text-sm text-red-500">
-//                     Missing Skills: {vac.missingSkills.join(", ")}
-//                   </p>
-//                 )}
-//                 {vac.summary && (
-//                   <p className="text-sm italic text-gray-600 mt-1">{vac.summary}</p>
-//                 )}
-//               </div>
-
-//               <div className="mt-4">
-//                 {vac.score >= 70 ? (
-//                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-//                     Apply Now
-//                   </button>
-//                 ) : (
-//                   <p className="text-sm text-gray-400">Improve skills to apply</p>
-//                 )}
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-
-
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-
-//   // 1️⃣ Load user from localStorage
-//   const user = JSON.parse(localStorage.getItem("user"));
-//   // console.log("DEBUG - User from localStorage:", user);
-
-//   useEffect(() => {
-//     const fetchVacanciesWithScore = async () => {
-//       try {
-//         if (!user || (!user._id && !user.id)) {
-//           console.error("User not found or missing _id/id in localStorage");
-//           setVacancies([]);
-//           setLoading(false);
-//           return;
-//         }
-
-//         // 2️⃣ Fetch vacancies
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-// if (!res.ok) throw new Error("Failed to fetch vacancies");
-// const data = await res.json();
-
-// // ✅ Limit to top 3 vacancies for testing
-// const limitedVacancies = data.slice(0, 3);
-
-
-//         // 3️⃣ Fetch AI match score for each vacancy
-//         // const scoredVacancies = await Promise.all(
-//         //   data.map(async (vac) => {
-//         //     try {
-//         //       const scoreRes = await fetch(
-//         //         "http://localhost:5000/api/ai/match-score",
-//         //         {
-//         //           method: "POST",
-//         //           headers: { "Content-Type": "application/json" },
-//         //           body: JSON.stringify({
-//         //             userId: user._id || user.id, // ✅ Correct userId
-//         //             vacancyId: vac._id,
-//         //           }),
-//         //         }
-//         //       );
-
-
-// // Limit vacancies to top 3 for testing / quota control
-// // const limitedVacancies = data.slice(0, 3);
-
-// const scoredVacancies = await Promise.all(
-//   limitedVacancies.map(async (vac) => {
-//     try {
-//       const scoreRes = await fetch(
-//         "http://localhost:5000/api/ai/match-score",
-//         {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({
-//             userId: user._id || user.id, // ✅ Correct userId
-//             vacancyId: vac._id,
-//           }),
-//         }
-//       );
-
-//       if (!scoreRes.ok) {
-//         const errMsg = await scoreRes.json();
-//         console.error("AI Match Error:", errMsg);
-//         return { ...vac, score: 0, missingSkills: [], summary: "Failed to get score" };
-//       }
-
-//       const scoreData = await scoreRes.json();
-
-//       return {
-//         ...vac,
-//         score: Number(scoreData.score) || 0,
-//         missingSkills: Array.isArray(scoreData.missingSkills)
-//           ? scoreData.missingSkills
-//           : [],
-//         summary: scoreData.summary || "",
-//       };
-//     } catch (err) {
-//       console.error("Error fetching AI score:", err);
-//       return { ...vac, score: 0, missingSkills: [], summary: "AI request failed" };
-//     }
-//   })
-// );
-
-// // If you want, you can append the remaining vacancies with a placeholder score
-// const placeholderVacancies = data.slice(3).map((vac) => ({
-//   ...vac,
-//   score: 0,
-//   missingSkills: [],
-//   summary: "Score not calculated (quota limited)",
-// }));
-
-// setVacancies([...scoredVacancies, ...placeholderVacancies]);
-
-//               // 4️⃣ Handle backend errors
-//         //       if (!scoreRes.ok) {
-//         //         const errMsg = await scoreRes.json();
-//         //         console.error("AI Match Error:", errMsg);
-//         //         return { ...vac, score: 0, missingSkills: [], summary: "Failed to get score" };
-//         //       }
-
-//         //       const scoreData = await scoreRes.json();
-
-//         //       return {
-//         //         ...vac,
-//         //         score: Number(scoreData.score) || 0,
-//         //         missingSkills: Array.isArray(scoreData.missingSkills)
-//         //           ? scoreData.missingSkills
-//         //           : [],
-//         //         summary: scoreData.summary || "",
-//         //       };
-//         //     } catch (err) {
-//         //       console.error("Error fetching AI score:", err);
-//         //       return { ...vac, score: 0, missingSkills: [], summary: "AI request failed" };
-//         //     }
-//         //   })
-//         // );
-
-//         // setVacancies(scoredVacancies);
-//       } catch (err) {
-//         console.error("Error fetching vacancies:", err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacanciesWithScore();
-//   }, [user]);
-
-//   if (loading) {
-//     return (
-//       <div className="pt-24 text-center">
-//         Analyzing jobs with your resume...
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div key={vac._id} className="bg-white p-5 rounded-lg shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               <div className="mt-4">
-//                 <p className="font-semibold text-green-600">
-//                   Match Score: {vac.score}%
-//                 </p>
-//                 {vac.missingSkills.length > 0 && (
-//                   <p className="text-sm text-red-500">
-//                     Missing Skills: {vac.missingSkills.join(", ")}
-//                   </p>
-//                 )}
-//                 {vac.summary && (
-//                   <p className="text-sm italic text-gray-600 mt-1">{vac.summary}</p>
-//                 )}
-//               </div>
-
-//               <div className="mt-4">
-//                 {vac.score >= 70 ? (
-//                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-//                     Apply Now
-//                   </button>
-//                 ) : (
-//                   <p className="text-sm text-gray-400">Improve skills to apply</p>
-//                 )}
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-// // import { useEffect, useState } from "react";
-
-// // export default function Recruitment() {
-// //   const [vacancies, setVacancies] = useState([]);
-// //   const [loading, setLoading] = useState(true);
-
-// //   // 1️⃣ Load user from localStorage
-// //   const user = JSON.parse(localStorage.getItem("user"));
-
-// //   useEffect(() => {
-// //     const fetchVacanciesWithScore = async () => {
-// //       try {
-// //         if (!user || (!user._id && !user.id)) {
-// //           console.error("User not found or missing _id/id in localStorage");
-// //           setVacancies([]);
-// //           setLoading(false);
-// //           return;
-// //         }
-
-// //         // 2️⃣ Fetch all vacancies from backend
-// //         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-// //         if (!res.ok) throw new Error("Failed to fetch vacancies");
-// //         const allVacancies = await res.json();
-
-// //         // 3️⃣ Fetch AI-scored vacancies from backend
-// //         // Limit AI scoring to top 3 vacancies to save quota
-// //         const resAI = await fetch("http://localhost:5000/api/ai/vacancy-scores", {
-// //           method: "POST",
-// //           headers: { "Content-Type": "application/json" },
-// //           body: JSON.stringify({ userId: user._id || user.id }),
-// //         });
-
-// //         let scoredVacancies = [];
-// //         if (resAI.ok) {
-// //           scoredVacancies = await resAI.json();
-// //         } else {
-// //           console.error("Failed to fetch AI scores");
-// //           // fallback: mark top 3 as unscored
-// //           scoredVacancies = allVacancies.slice(0, 3).map((vac) => ({
-// //             ...vac,
-// //             score: 0,
-// //             missingSkills: [],
-// //             summary: "Score not calculated (AI error)",
-// //           }));
-// //         }
-
-// //         // 4️⃣ Append remaining vacancies as placeholders
-// //         const placeholderVacancies = allVacancies.slice(scoredVacancies.length).map((vac) => ({
-// //           ...vac,
-// //           score: 0,
-// //           missingSkills: [],
-// //           summary: "Score not calculated (quota limited)",
-// //         }));
-
-// //         setVacancies([...scoredVacancies, ...placeholderVacancies]);
-// //       } catch (err) {
-// //         console.error("Error fetching vacancies:", err);
-// //         setVacancies([]);
-// //       } finally {
-// //         setLoading(false);
-// //       }
-// //     };
-
-// //     fetchVacanciesWithScore();
-// //   }, [user]);
-
-// //   if (loading) {
-// //     return (
-// //       <div className="pt-24 text-center">
-// //         Analyzing jobs with your resume...
-// //       </div>
-// //     );
-// //   }
-
-// //   return (
-// //     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-// //       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-// //       {vacancies.length === 0 ? (
-// //         <p>No vacancies available currently.</p>
-// //       ) : (
-// //         <div className="grid gap-5">
-// //           {vacancies.map((vac) => (
-// //             <div key={vac._id} className="bg-white p-5 rounded-lg shadow">
-// //               <h3 className="text-lg font-semibold">{vac.title}</h3>
-// //               <p className="mt-2 text-gray-700">{vac.description}</p>
-// //               <p className="text-sm text-gray-500 mt-1">
-// //                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-// //               </p>
-
-// //               <div className="mt-4">
-// //                 <p className="font-semibold text-green-600">
-// //                   Match Score: {vac.score}%
-// //                 </p>
-// //                 {vac.missingSkills.length > 0 && (
-// //                   <p className="text-sm text-red-500">
-// //                     Missing Skills: {vac.missingSkills.join(", ")}
-// //                   </p>
-// //                 )}
-// //                 {vac.summary && (
-// //                   <p className="text-sm italic text-gray-600 mt-1">{vac.summary}</p>
-// //                 )}
-// //               </div>
-
-// //               <div className="mt-4">
-// //                 {vac.score >= 70 ? (
-// //                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-// //                     Apply Now
-// //                   </button>
-// //                 ) : (
-// //                   <p className="text-sm text-gray-400">Improve skills to apply</p>
-// //                 )}
-// //               </div>
-// //             </div>
-// //           ))}
-// //         </div>
-// //       )}
-// //     </div>
-// //   );
-// // }
-
-
-
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   // 1️⃣ Load user from localStorage
-//   const user = JSON.parse(localStorage.getItem("user"));
-
-//   useEffect(() => {
-//     const fetchVacancies = async () => {
-//       try {
-//         if (!user || (!user._id && !user.id)) {
-//           setError("User not found");
-//           setVacancies([]);
-//           return;
-//         }
-
-//         // 2️⃣ Fetch vacancies from backend
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         if (!res.ok) throw new Error("Failed to fetch vacancies");
-
-//         const data = await res.json();
-
-//         const vacanciesArray = Array.isArray(data) ? data : [];
-
-//         // 3️⃣ Optional: fetch AI match score for each vacancy
-//         const scoredVacancies = await Promise.all(
-//           vacanciesArray.map(async (vac) => {
-//             try {
-//               const scoreRes = await fetch(
-//                 "http://localhost:5000/api/ai/match-score",
-//                 {
-//                   method: "POST",
-//                   headers: { "Content-Type": "application/json" },
-//                   body: JSON.stringify({
-//                     userId: user._id || user.id,
-//                     vacancyId: vac._id,
-//                   }),
-//                 }
-//               );
-
-//               if (!scoreRes.ok) return { ...vac, score: 0, missingSkills: [], summary: "Score unavailable" };
-
-//               const scoreData = await scoreRes.json();
-
-//               return {
-//                 ...vac,
-//                 score: Number(scoreData.score) || 0,
-//                 missingSkills: Array.isArray(scoreData.missingSkills)
-//                   ? scoreData.missingSkills
-//                   : [],
-//                 summary: scoreData.summary || "",
-//               };
-//             } catch {
-//               return { ...vac, score: 0, missingSkills: [], summary: "AI request failed" };
-//             }
-//           })
-//         );
-
-//         setVacancies(scoredVacancies);
-//       } catch (err) {
-//         console.error("Error fetching vacancies:", err);
-//         setError(err.message || "Failed to load vacancies");
-//         setVacancies([]);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacancies();
-//   }, [user]);
-
-//   if (loading) return <div className="pt-24 text-center">Loading vacancies...</div>;
-//   if (error) return <div className="pt-24 text-center text-red-500">{error}</div>;
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div key={vac._id} className="bg-white p-5 rounded-lg shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               <div className="mt-4">
-//                 <p className="font-semibold text-green-600">
-//                   Match Score: {vac.score || 0}%
-//                 </p>
-//                 {vac.missingSkills && vac.missingSkills.length > 0 && (
-//                   <p className="text-sm text-red-500">
-//                     Missing Skills: {vac.missingSkills.join(", ")}
-//                   </p>
-//                 )}
-//                 {vac.summary && (
-//                   <p className="text-sm italic text-gray-600 mt-1">{vac.summary}</p>
-//                 )}
-//               </div>
-
-//               <div className="mt-4">
-//                 {vac.score >= 70 ? (
-//                   <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-//                     Apply Now
-//                   </button>
-//                 ) : (
-//                   <p className="text-sm text-gray-400">Improve skills to apply</p>
-//                 )}
-//               </div>
-
-//               <div className="text-sm text-gray-400 mt-2">
-//                 Posted by: HR Admin
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   // Load user from localStorage
-//   const user = JSON.parse(localStorage.getItem("user"));
-
-//   useEffect(() => {
-//     const fetchVacancies = async () => {
-//       try {
-//         if (!user || (!user._id && !user.id)) {
-//           setError("User not found");
-//           setVacancies([]);
-//           setLoading(false);
-//           return;
-//         }
-
-//         // Fetch vacancies from backend
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         if (!res.ok) throw new Error("Failed to fetch vacancies");
-
-//         const data = await res.json();
-//         setVacancies(Array.isArray(data) ? data : []);
-//       } catch (err) {
-//         console.error("Error fetching vacancies:", err);
-//         setError(err.message || "Failed to load vacancies");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacancies();
-//   }, [user]);
-
-//   // ✅ Handle Check Score
-//   const handleCheckScore = async (vacancyId) => {
-//     if (!user || (!user._id && !user.id)) return alert("User not logged in");
-
-//     // Set a temporary loading state for this vacancy
-//     setVacancies((prev) =>
-//       prev.map((vac) =>
-//         vac._id === vacancyId ? { ...vac, checking: true } : vac
-//       )
-//     );
-
-//     try {
-//       const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ userId: user._id || user.id, vacancyId }),
-//       });
-
-//       const data = await res.json();
-
-//       // Update the vacancy with AI score info
-//       setVacancies((prev) =>
-//         prev.map((vac) =>
-//           vac._id === vacancyId
-//             ? {
-//                 ...vac,
-//                 score: data.score || 0,
-//                 missingSkills: data.missingSkills || [],
-//                 summary: data.summary || "Score unavailable",
-//                 checking: false,
-//               }
-//             : vac
-//         )
-//       );
-//     } catch (err) {
-//       console.error(err);
-//       alert("Failed to fetch AI score");
-//       setVacancies((prev) =>
-//         prev.map((vac) =>
-//           vac._id === vacancyId ? { ...vac, checking: false } : vac
-//         )
-//       );
-//     }
-//   };
-
-//   if (loading)
-//     return <div className="pt-24 text-center">Loading vacancies...</div>;
-//   if (error)
-//     return <div className="pt-24 text-center text-red-500">{error}</div>;
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div key={vac._id} className="bg-white p-5 rounded-lg shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               {/* Check Score Button */}
-//               <button
-//                 onClick={() => handleCheckScore(vac._id)}
-//                 disabled={vac.checking}
-//                 className={`mt-3 px-3 py-1 rounded ${
-//                   vac.checking
-//                     ? "bg-gray-400 cursor-not-allowed"
-//                     : "bg-blue-600 text-white hover:bg-blue-700"
-//                 }`}
-//               >
-//                 {vac.checking ? "Checking..." : "Check Score"}
-//               </button>
-
-//               {/* Display AI Results */}
-//               {vac.score !== undefined && (
-//                 <div className="mt-3 p-3 bg-gray-100 rounded">
-//                   <p>
-//                     <strong>Score:</strong> {vac.score}%
-//                   </p>
-//                   <p>
-//                     <strong>Missing Skills:</strong>{" "}
-//                     {vac.missingSkills.length > 0
-//                       ? vac.missingSkills.join(", ")
-//                       : "None"}
-//                   </p>
-//                   <p>
-//                     <strong>Summary:</strong> {vac.summary}
-//                   </p>
-//                 </div>
-//               )}
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   // Load user from localStorage
-//   const user = JSON.parse(localStorage.getItem("user"));
-
-//   useEffect(() => {
-//     const fetchVacancies = async () => {
-//       try {
-//         if (!user || (!user._id && !user.id)) {
-//           setError("User not found");
-//           setVacancies([]);
-//           return;
-//         }
-
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         if (!res.ok) throw new Error("Failed to fetch vacancies");
-
-//         const data = await res.json();
-//         setVacancies(Array.isArray(data) ? data : []);
-//       } catch (err) {
-//         console.error(err);
-//         setError(err.message || "Failed to load vacancies");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacancies();
-//   }, [user]);
-
-//   // Function to check AI match score for a vacancy
-//   const checkScore = async (vacancyId) => {
-//     setVacancies((prev) =>
-//       prev.map((v) =>
-//         v._id === vacancyId ? { ...v, aiLoading: true, aiError: "" } : v
-//       )
-//     );
-
-//     try {
-//       const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ userId: user._id || user.id, vacancyId }),
-//       });
-
-//       if (!res.ok) throw new Error("Failed to get AI score");
-
-//       const data = await res.json();
-
-//       setVacancies((prev) =>
-//         prev.map((v) =>
-//           v._id === vacancyId
-//             ? { ...v, aiScore: data, aiLoading: false }
-//             : v
-//         )
-//       );
-//     } catch (err) {
-//       console.error(err);
-//       setVacancies((prev) =>
-//         prev.map((v) =>
-//           v._id === vacancyId
-//             ? { ...v, aiError: err.message || "AI analysis failed", aiLoading: false }
-//             : v
-//         )
-//       );
-//     }
-//   };
-
-//   if (loading) return <div className="pt-24 text-center">Loading vacancies...</div>;
-//   if (error) return <div className="pt-24 text-center text-red-500">{error}</div>;
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available currently.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div key={vac._id} className="bg-white p-5 rounded-lg shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               <button
-//                 className="mt-3 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-//                 onClick={() => checkScore(vac._id)}
-//                 disabled={vac.aiLoading}
-//               >
-//                 {vac.aiLoading ? "Analyzing..." : "Check Score"}
-//               </button>
-
-//               {vac.aiError && (
-//                 <p className="text-red-500 mt-2">{vac.aiError}</p>
-//               )}
-
-//             {vac.aiScore?.score !== undefined && !vac.aiLoading && (
-  
-//                 <div className="mt-3 p-3 border rounded bg-gray-50 space-y-1">
-//                   <p><strong>Score:</strong> {vac.aiScore.score}</p>
-//                   <p>
-//   <strong>Missing Skills:</strong>{" "}
-//   {(vac.aiScore?.missingSkills || []).join(", ") || "None"}
-// </p>
-
-//                   {/* <p><strong>Missing Skills:</strong> {vac.aiScore.missingSkills.join(", ") || "None"}</p> */}
-//                   <p><strong>Summary:</strong> {vac.aiScore.summary}</p>
-//                 </div>
-//               )}
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-// import { useEffect, useState } from "react";
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   // Load user safely
-//   const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-//   // ================= FETCH VACANCIES =================
-//   useEffect(() => {
-//     const fetchVacancies = async () => {
-//       try {
-//         if (!user || (!user._id && !user.id)) {
-//           setError("User not found. Please login again.");
-//           setVacancies([]);
-//           return;
-//         }
-
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         if (!res.ok) throw new Error("Failed to fetch vacancies");
-
-//         const data = await res.json();
-//         setVacancies(Array.isArray(data) ? data : []);
-//       } catch (err) {
-//         console.error(err);
-//         setError("Error loading vacancies");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacancies();
-//   }, []);
-
-//   // ================= AI SCORE CHECK =================
-//   const checkScore = async (vacancyId) => {
-//     console.log("CHECK SCORE CLICKED:", vacancyId);
-
-//     // show loading for clicked vacancy
-//     setVacancies(prev =>
-//       prev.map(v =>
-//         String(v._id) === String(vacancyId)
-//           ? { ...v, aiLoading: true, aiError: null }
-//           : v
-//       )
-//     );
-
-//     try {
-//       const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({
-//           userId: user._id || user.id,
-//           vacancyId,
-//         }),
-//       });
-
-//       if (!res.ok) throw new Error("AI score fetch failed");
-
-//       const data = await res.json();
-//       console.log("AI RESPONSE:", data);
-
-//       // handle both {result:{}} and direct {}
-//       const scoreData = data.result || data;
-
-//       setVacancies(prev =>
-//         prev.map(v =>
-//           String(v._id) === String(vacancyId)
-//             ? {
-//                 ...v,
-//                 aiScore: {
-//                   score: scoreData.score ?? 0,
-//                   missingSkills: scoreData.missingSkills ?? [],
-//                   matchedSkills: scoreData.matchedSkills ?? [],
-//                   summary: scoreData.summary ?? "No summary",
-//                 },
-//                 aiLoading: false,
-//               }
-//             : v
-//         )
-//       );
-//     } catch (err) {
-//       console.error(err);
-//       setVacancies(prev =>
-//         prev.map(v =>
-//           String(v._id) === String(vacancyId)
-//             ? {
-//                 ...v,
-//                 aiError: "AI analysis failed",
-//                 aiLoading: false,
-//               }
-//             : v
-//         )
-//       );
-//     }
-//   };
-
-//   // ================= UI STATES =================
-//   if (loading)
-//     return <div className="pt-24 text-center">Loading vacancies...</div>;
-
-//   if (error)
-//     return (
-//       <div className="pt-24 text-center text-red-500">{error}</div>
-//     );
-
-//   // ================= RENDER =================
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map((vac) => (
-//             <div key={vac._id} className="bg-white p-5 rounded shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               <button
-//                 className="mt-3 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-//                 onClick={() => checkScore(vac._id)}
-//                 disabled={vac.aiLoading}
-//               >
-//                 {vac.aiLoading ? "Analyzing..." : "Check Score"}
-//               </button>
-
-//               {vac.aiError && (
-//                 <p className="text-red-500 mt-2">{vac.aiError}</p>
-//               )}
-
-//               {vac.aiScore && !vac.aiLoading && (
-//                 <div className="mt-4 p-3 border rounded bg-gray-50">
-//                   <p>
-//                     <strong>Score:</strong>{" "}
-//                     <span className="text-green-600">
-//                       {vac.aiScore.score}%
-//                     </span>
-//                   </p>
-
-//                   <p>
-//                     <strong>Matched Skills:</strong>{" "}
-//                     {vac.aiScore.matchedSkills.length
-//                       ? vac.aiScore.matchedSkills.join(", ")
-//                       : "None"}
-//                   </p>
-
-//                   <p>
-//                     <strong>Missing Skills:</strong>{" "}
-//                     {vac.aiScore.missingSkills.length
-//                       ? vac.aiScore.missingSkills.join(", ")
-//                       : "None"}
-//                   </p>
-
-//                   <p className="mt-2">
-//                     <strong>Summary:</strong> {vac.aiScore.summary}
-//                   </p>
-//                 </div>
-//               )}
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-// import { useEffect, useState } from "react";
-
-// // 🔐 SAFE USER ID FETCH
-// const getUserId = () => {
-//   try {
-//     const user = JSON.parse(localStorage.getItem("user"));
-//     return user?._id || user?.id || user?.user?._id || null;
-//   } catch {
-//     return null;
-//   }
-// };
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   const userId = getUserId();
-
-//   // ================= FETCH VACANCIES =================
-//   useEffect(() => {
-//     const fetchVacancies = async () => {
-//       try {
-//         if (!userId) {
-//           setError("User not found. Please login again.");
-//           setLoading(false);
-//           return;
-//         }
-
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         if (!res.ok) throw new Error("Failed to fetch vacancies");
-
-//         const data = await res.json();
-//         setVacancies(Array.isArray(data) ? data : []);
-//       } catch (err) {
-//         console.error(err);
-//         setError("Error loading vacancies");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacancies();
-//   }, [userId]);
-
-//   // ================= AI SCORE CHECK =================
-//   const checkScore = async (vacancyId) => {
-//     setVacancies(prev =>
-//       prev.map(v =>
-//         String(v._id) === String(vacancyId)
-//           ? { ...v, aiLoading: true, aiError: null }
-//           : v
-//       )
-//     );
-
-//     try {
-//       const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ userId, vacancyId }),
-//       });
-
-//       if (!res.ok) throw new Error("AI score fetch failed");
-
-//       const data = await res.json();
-
-//       setVacancies(prev =>
-//         prev.map(v =>
-//           String(v._id) === String(vacancyId)
-//             ? {
-//                 ...v,
-//                 aiScore: {
-//                   score: data.score ?? 0,
-//                   matchedSkills: data.matchedSkills ?? [],
-//                   missingSkills: data.missingSkills ?? [],
-//                   summary: data.summary ?? "No summary",
-//                 },
-//                 aiLoading: false,
-//               }
-//             : v
-//         )
-//       );
-//     } catch (err) {
-//       console.error(err);
-//       setVacancies(prev =>
-//         prev.map(v =>
-//           String(v._id) === String(vacancyId)
-//             ? { ...v, aiError: "AI analysis failed", aiLoading: false }
-//             : v
-//         )
-//       );
-//     }
-//   };
-
-//   // ================= UI STATES =================
-//   if (loading)
-//     return <div className="pt-24 text-center">Loading vacancies...</div>;
-
-//   if (error)
-//     return <div className="pt-24 text-center text-red-500">{error}</div>;
-
-//   // ================= RENDER =================
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       {vacancies.length === 0 ? (
-//         <p>No vacancies available.</p>
-//       ) : (
-//         <div className="grid gap-5">
-//           {vacancies.map(vac => (
-//             <div key={vac._id} className="bg-white p-5 rounded shadow">
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="mt-2 text-gray-700">{vac.description}</p>
-
-//               <p className="text-sm text-gray-500 mt-1">
-//                 {vac.location || "N/A"} | {vac.salary || "N/A"}
-//               </p>
-
-//               <button
-//                 className="mt-3 bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-//                 onClick={() => checkScore(vac._id)}
-//                 disabled={vac.aiLoading}
-//               >
-//                 {vac.aiLoading ? "Analyzing..." : "Check AI Match"}
-//               </button>
-
-//               {vac.aiError && (
-//                 <p className="text-red-500 mt-2">{vac.aiError}</p>
-//               )}
-
-//               {vac.aiScore && !vac.aiLoading && (
-//                 <div className="mt-4 p-3 border rounded bg-gray-50">
-//                   <p>
-//                     <strong>Score:</strong>{" "}
-//                     <span className="text-green-600">
-//                       {vac.aiScore.score}%
-//                     </span>
-//                   </p>
-
-//                   <p>
-//                     <strong>Matched Skills:</strong>{" "}
-//                     {vac.aiScore.matchedSkills.length
-//                       ? vac.aiScore.matchedSkills.join(", ")
-//                       : "None"}
-//                   </p>
-
-//                   <p>
-//                     <strong>Missing Skills:</strong>{" "}
-//                     {vac.aiScore.missingSkills.length
-//                       ? vac.aiScore.missingSkills.join(", ")
-//                       : "None"}
-//                   </p>
-
-//                   <p className="mt-2">
-//                     <strong>Summary:</strong> {vac.aiScore.summary}
-//                   </p>
-//                 </div>
-//               )}
-//             </div>
-//           ))}
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-
-
-// import { useEffect, useState } from "react";
-// import { useLocation } from "react-router-dom";
-// const getUserId = () => {
-//   try {
-//     const user = JSON.parse(localStorage.getItem("user"));
-//     return user?._id || user?.id || null;
-//   } catch {
-//     return null;
-//   }
-// };
-
-// export default function Recruitment() {
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-//   const location = useLocation();
-// const params = new URLSearchParams(location.search);
-// const matchedOnly = params.get("matched") === "true";
-
-// // const location = useLocation();
-// // const matchedOnly = location.state?.matchedOnly || false;
-//   const userId = getUserId();
-
-//   // ================= FETCH VACANCIES =================
-//   useEffect(() => {
-//     const fetchVacancies = async () => {
-//       try {
-//         if (!userId) {
-//           setError("User not found. Please login again.");
-//           setLoading(false);
-//           return;
-//         }
-
-//         const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//         const data = await res.json();
-
-//         // 🔥 ATTACH EXISTING AI SCORE FROM DB
-//         const enriched = data.map(v => {
-//           const existingScore = v.aiScores?.find(
-//             s => String(s.userId) === String(userId)
-//           );
-
-//           return {
-//             ...v,
-//             aiScore: existingScore || null,
-//             aiLoading: false,
-//             aiError: null
-//           };
-//         });
-
-//         setVacancies(enriched);
-//       } catch (err) {
-//         console.error(err);
-//         setError("Error loading vacancies");
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchVacancies();
-//   }, [userId]);
-
-//   // ================= CHECK / RECHECK SCORE =================
-//   const checkScore = async (vacancyId) => {
-//     setVacancies(prev =>
-//       prev.map(v =>
-//         v._id === vacancyId ? { ...v, aiLoading: true } : v
-//       )
-//     );
-
-//     try {
-//       const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ userId, vacancyId }),
-//       });
-
-//       const data = await res.json();
-
-//       setVacancies(prev =>
-//         prev.map(v =>
-//           v._id === vacancyId
-//             ? { ...v, aiScore: data, aiLoading: false }
-//             : v
-//         )
-//       );
-//     } catch (err) {
-//       setVacancies(prev =>
-//         prev.map(v =>
-//           v._id === vacancyId
-//             ? { ...v, aiError: "AI failed", aiLoading: false }
-//             : v
-//         )
-//       );
-//     }
-//   };
-
-//   if (loading) return <div className="pt-24 text-center">Loading...</div>;
-//   if (error) return <div className="pt-24 text-center text-red-500">{error}</div>;
-
-//   return (
-//     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-//       <h2 className="text-2xl font-bold mb-6">Recruitment</h2>
-
-//       <div className="grid gap-5">
-//         {vacancies
-//   .filter(vac => (matchedOnly ? !!vac.aiScore : true))
-//   .map(vac => (
-//     <div key={vac._id} className="bg-white p-5 rounded shadow">
-//       <h3 className="text-lg font-semibold">{vac.title}</h3>
-//       <p className="text-gray-700 mt-1">{vac.description}</p>
-
-//       <button
-//         onClick={() => checkScore(vac._id)}
-//         disabled={vac.aiLoading}
-//         className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-//       >
-//         {vac.aiLoading
-//           ? "Analyzing..."
-//           : vac.aiScore
-//           ? "Re-check Score"
-//           : "Check Score"}
-//       </button>
-
-//       {/* ✅ AI SCORE DISPLAY */}
-//       {vac.aiScore && (
-//         <div className="mt-4 p-3 border rounded bg-gray-50">
-//           <p><strong>Score:</strong> {vac.aiScore.score}%</p>
-//           <p>
-//             <strong>Matched Skills:</strong>{" "}
-//             {vac.aiScore.matchedSkills?.join(", ") || "None"}
-//           </p>
-//           <p>
-//             <strong>Missing Skills:</strong>{" "}
-//             {vac.aiScore.missingSkills?.join(", ") || "None"}
-//           </p>
-//           <p className="mt-2">
-//             <strong>Summary:</strong> {vac.aiScore.summary}
-//           </p>
-//         </div>
-//       )}
-//     </div>
-// ))}
-
-//         {/* {vacancies.map(vac => (
-//           <div key={vac._id} className="bg-white p-5 rounded shadow">
-//             <h3 className="text-lg font-semibold">{vac.title}</h3>
-//             <p className="text-gray-700 mt-1">{vac.description}</p>
-
-//             <button
-//               onClick={() => checkScore(vac._id)}
-//               disabled={vac.aiLoading}
-//               className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-//             >
-//               {vac.aiLoading
-//                 ? "Analyzing..."
-//                 : vac.aiScore
-//                 ? "Re-check Score"
-//                 : "Check Score"}
-//             </button>
-
-//             {/* ✅ PERSISTENT AI SCORE */}
-//             {/* {vac.aiScore && (
-//           //     <div className="mt-4 p-3 border rounded bg-gray-50">
-//           //       <p><strong>Score:</strong> {vac.aiScore.score}%</p>
-//           //       <p>
-//           //         <strong>Matched Skills:</strong>{" "}
-//           //         {vac.aiScore.matchedSkills?.join(", ") || "None"}
-//           //       </p>
-//           //       <p>
-//           //         <strong>Missing Skills:</strong>{" "}
-//           //         {vac.aiScore.missingSkills?.join(", ") || "None"}
-//           //       </p>
-//           //       <p className="mt-2">
-//           //         <strong>Summary:</strong> {vac.aiScore.summary}
-//           //       </p>
-//           //     </div>
-//           //   )}
-//           // </div> */}
-//         {/* ))} */} 
-//       </div>
-//     </div>
-//   );
-// }
-
-
-// import { useEffect, useState } from "react";
-// import { useLocation } from "react-router-dom";
-// import { useNavigate } from "react-router-dom";
-
-// // 🔐 SAFE USER ID FETCH
-// const getUserId = () => {
-//   try {
-//     const user = JSON.parse(localStorage.getItem("user"));
-//     return user?._id || user?.id || null;
-//   } catch {
-//     return null;
-//   }
-// };
-
-// export default function Recruitment({ sidebarOpen }) {
-
-//   const [vacancies, setVacancies] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   const userId = getUserId();
-
-//   const navigate = useNavigate();
-
-
-//   // 🔎 READ QUERY PARAM (?matched=true)
-//   const location = useLocation();
-//   const params = new URLSearchParams(location.search);
-//   const matchedOnly = params.get("matched") === "true";
-
-//   // ================= FETCH VACANCIES =================
-
-
-//   useEffect(() => {
-//   const fetchVacancies = async () => {
-//     if (!userId) return;
-
-//     setLoading(true);
-//     try {
-//       const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//       const data = await res.json();
-
-//       const enriched = data.map((v, i) => {
-//         const existingScore = v.aiScores?.find(
-//           s => String(s.userId) === String(userId)
-//         );
-//         return {
-//           ...v,
-//           aiScore: existingScore || null,
-//           aiLoading: false,
-//           aiError: null,
-//           autoAnalyze: i < 3 // only first 3 vacancies for auto-analysis
-//         };
-//       });
-
-//       setVacancies(enriched);
-//     } catch (err) {
-//       console.error(err);
-//       setError("Error loading vacancies");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   fetchVacancies();
-// }, [userId]);
-
-// // ================= AUTO-ANALYZE FIRST N =================
-// useEffect(() => {
-//   vacancies.forEach(v => {
-//     if (v.autoAnalyze && !v.aiScore && !v.aiLoading) {
-//       checkScore(v._id);
-//     }
-//   });
-// }, [vacancies]);
-
-//   // useEffect(() => {
-//   //   const fetchVacancies = async () => {
-//   //     try {
-//   //       if (!userId) {
-//   //         setError("User not found. Please login again.");
-//   //         setLoading(false);
-//   //         return;
-//   //       }
-
-//   //       const res = await fetch("http://localhost:5000/api/hr/vacancies");
-//   //       const data = await res.json();
-
-//   //       // 🔥 ATTACH USER-SPECIFIC AI SCORE (FROM DB)
-//   //       const enriched = data.map(v => {
-//   //         const existingScore = v.aiScores?.find(
-//   //           s => String(s.userId) === String(userId)
-//   //         );
-
-//   //         return {
-//   //           ...v,
-//   //           aiScore: existingScore || null, // user-specific
-//   //           aiLoading: false,
-//   //           aiError: null
-//   //         };
-//   //       });
-
-//   //       setVacancies(enriched);
-//   //     } catch (err) {
-//   //       console.error(err);
-//   //       setError("Error loading vacancies");
-//   //     } finally {
-//   //       setLoading(false);
-//   //     }
-//   //   };
-
-//   //   fetchVacancies();
-//   // }, [userId]);
-
-//   // ================= CHECK / RECHECK SCORE =================
-//   // const checkScore = async (vacancyId) => {
-//   //   setVacancies(prev =>
-//   //     prev.map(v =>
-//   //       v._id === vacancyId ? { ...v, aiLoading: true } : v
-//   //     )
-//   //   );
-
-//   //   try {
-//   //     const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//   //       method: "POST",
-//   //       headers: { "Content-Type": "application/json" },
-//   //       body: JSON.stringify({ userId, vacancyId })
-//   //     });
-
-//   //     const data = await res.json();
-
-//   //     setVacancies(prev =>
-//   //       prev.map(v =>
-//   //         v._id === vacancyId
-//   //           ? { ...v, aiScore: data, aiLoading: false }
-//   //           : v
-//   //       )
-//   //     );
-//   //   } catch (err) {
-//   //     setVacancies(prev =>
-//   //       prev.map(v =>
-//   //         v._id === vacancyId
-//   //           ? { ...v, aiError: "AI failed", aiLoading: false }
-//   //           : v
-//   //       )
-//   //     );
-//   //   }
-//   // };
-// const checkScore = async (vacancyId) => {
-//   console.log("Checking score for:", vacancyId, "user:", userId);
-
-//   setVacancies(prev =>
-//     prev.map(v =>
-//       v._id === vacancyId ? { ...v, aiLoading: true } : v
-//     )
-//   );
-
-//   try {
-//     const res = await fetch("http://localhost:5000/api/ai/match-score", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/json" },
-//       body: JSON.stringify({ userId, vacancyId })
-//     });
-
-//     const data = await res.json();
-//     console.log("AI response:", data);
-
-//     setVacancies(prev =>
-//       prev.map(v =>
-//         v._id === vacancyId
-//           ? { ...v, aiScore: data, aiLoading: false }
-//           : v
-//       )
-//     );
-//   } catch (err) {
-//     console.error("Check score failed:", err);
-//     setVacancies(prev =>
-//       prev.map(v =>
-//         v._id === vacancyId
-//           ? { ...v, aiError: "AI failed", aiLoading: false }
-//           : v
-//       )
-//     );
-//   }
-// };
-
-//   if (loading) return <div className="pt-24 text-center">Loading...</div>;
-//   if (error)
-//     return (
-//       <div className="pt-24 text-center text-red-500">{error}</div>
-//     );
-
-
-//     return (
-//       <div
-//   className={`min-h-screen bg-[#0b1020] px-6 pt-8 text-gray-200
-//   transition-all duration-300
-//   ${sidebarOpen ? "ml-60" : "ml-0"}`}
-// >
-
-//   {/* <div className="min-h-screen bg-[#0b1020] px-6 pt-8 ml-64 text-gray-200"> */}
-
-//     {/* Page Title */}
-//     <h2 className="text-2xl font-semibold mb-6">
-//       {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
-//     </h2>
-
-//     {/* Jobs Grid */}
-//     <div className="grid gap-6">
-//       {vacancies
-//         .filter(vac =>
-//           matchedOnly
-//             ? vac.aiScore && Number(vac.aiScore.score) >= 70
-//             : true
-//         )
-//         .sort((a, b) => {
-//           const scoreA = a.aiScore?.score ?? -1;
-//           const scoreB = b.aiScore?.score ?? -1;
-//           return scoreB - scoreA;
-//         })
-//         .map(vac => (
-//           <div
-//             key={vac._id}
-//             className="relative bg-[#11162a] border border-white/10
-//                        rounded-2xl p-6 shadow-lg hover:shadow-xl
-//                        transition"
-//           >
-
-//             {/* Match Badge */}
-//             {vac.aiScore && (
-//               <span
-//                 className={`absolute top-4 right-4 px-3 py-1 text-sm font-semibold rounded-full
-//                   ${
-//                     vac.aiScore.score >= 80
-//                       ? "bg-green-500/20 text-green-400"
-//                       : vac.aiScore.score >= 60
-//                       ? "bg-yellow-500/20 text-yellow-400"
-//                       : "bg-red-500/20 text-red-400"
-//                   }`}
-//               >
-//                 {vac.aiScore.score}% Match
-//               </span>
-//             )}
-
-//             {/* Job Info */}
-//             <h3 className="text-lg font-semibold text-white">
-//               {vac.title}
-//             </h3>
-
-//             <p className="text-gray-400 mt-2">
-//               {vac.jobDescription}
-//             </p>
-
-//             {/* Actions */}
-//             <div className="mt-4 flex items-center gap-3">
-//               <button
-//                 onClick={() => checkScore(vac._id)}
-//                 disabled={vac.aiLoading}
-//                 className="bg-indigo-600 hover:bg-indigo-700
-//                            disabled:opacity-60
-//                            text-white px-4 py-2 rounded-lg text-sm transition"
-//               >
-//                 {vac.aiLoading
-//                   ? "Analyzing..."
-//                   : vac.aiScore
-//                   ? "Re-check Score"
-//                   : "Check Score"}
-//               </button>
-
-//               {vac.aiScore && vac.aiScore.score >= 70 && (
-//                 <button
-//                   onClick={() => navigate(`/apply/${vac._id}`)}
-//                   className="bg-green-600 hover:bg-green-700
-//                              text-white px-4 py-2 rounded-lg text-sm transition"
-//                 >
-//                   Apply
-//                 </button>
-//               )}
-//             </div>
-
-//             {/* AI Result */}
-//             {vac.aiScore && (
-//               <div className="mt-5 bg-[#0b1020] border border-white/10
-//                               rounded-xl p-4 text-sm space-y-2">
-//                 <p>
-//                   <span className="font-semibold text-gray-300">
-//                     Score:
-//                   </span>{" "}
-//                   {vac.aiScore.score}%
-//                 </p>
-
-//                 <p>
-//                   <span className="font-semibold text-gray-300">
-//                     Matched Skills:
-//                   </span>{" "}
-//                   {vac.aiScore.matchedSkills?.join(", ") || "None"}
-//                 </p>
-
-//                 <p>
-//                   <span className="font-semibold text-gray-300">
-//                     Missing Skills:
-//                   </span>{" "}
-//                   {vac.aiScore.missingSkills?.join(", ") || "None"}
-//                 </p>
-
-//                 <p className="pt-2 text-gray-400">
-//                   <span className="font-semibold text-gray-300">
-//                     Summary:
-//                   </span>{" "}
-//                   {vac.aiScore.summary}
-//                 </p>
-//               </div>
-//             )}
-//           </div>
-//         ))}
-//     </div>
-//   </div>
-// );
-
-
-// //   return (
-// //     <div className="p-6 pt-24 bg-gray-50 min-h-screen ml-64">
-// //       <h2 className="text-2xl font-bold mb-6">
-// //         {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
-// //       </h2>
-
-// //       <div className="grid gap-5">
-// //         {vacancies
-// //   // ✅ FILTER (matched page or all page)
-// //   .filter(vac =>
-// //     matchedOnly
-// //       ? vac.aiScore && Number(vac.aiScore.score) >= 70
-// //       : true
-// //   )
-
-// //   // 🔢 SORT BY SCORE (DESC)
-// //   .sort((a, b) => {
-// //     const scoreA = a.aiScore?.score ?? -1;
-// //     const scoreB = b.aiScore?.score ?? -1;
-// //     return scoreB - scoreA;
-// //   })
-
-// //   .map(vac => (
-// //  <div
-// //   key={vac._id}
-// //   className="bg-white p-5 rounded shadow relative"
-// // >
-
-
-// // {/* 
-// // {vacancies
-// //   .filter(vac =>
-// //     matchedOnly
-// //       ? vac.aiScore && Number(vac.aiScore.score) >= 70
-// //       : true
-// //   )
-// //   .map(vac => (
-// //     <div
-// //       key={vac._id}
-// //       className="bg-white p-5 rounded shadow"
-// //     > */}
-// //       <h3 className="text-lg font-semibold">{vac.title}</h3>
-// //       <p className="text-gray-700 mt-1">{vac.description}</p>
-
-
-// // {/* ✅ MATCH BADGE */}
-// // {vac.aiScore && (
-// //   <span
-// //     className={`absolute top-3 right-3 px-3 py-1 text-sm font-semibold rounded-full
-// //       ${
-// //         vac.aiScore.score >= 80
-// //           ? "bg-green-100 text-green-700"
-// //           : vac.aiScore.score >= 60
-// //           ? "bg-yellow-100 text-yellow-700"
-// //           : "bg-red-100 text-red-700"
-// //       }`}
-// //   >
-// //     {vac.aiScore.score}% Match
-// //   </span>
-// // )}
-
-
-// // <button
-// //   onClick={() => checkScore(vac._id)}
-// //   disabled={vac.aiLoading}
-// //   className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-// // >
-// //   {vac.aiLoading
-// //     ? "Analyzing..."
-// //     : vac.aiScore
-// //     ? "Re-check Score"
-// //     : "Check Score"}
-// // </button>
-
-// // {/* ✅ APPLY BUTTON (only after score exists & matched) */}
-// // {vac.aiScore && vac.aiScore.score >= 70 && (
-// //   <button
-// //     onClick={() => navigate(`/apply/${vac._id}`)}
-// //     className="mt-3 ml-3 bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700"
-// //   >
-// //     Apply
-// //   </button>
-// // )}
-
-// //       {/* <button
-// //         onClick={() => checkScore(vac._id)}
-// //         disabled={vac.aiLoading}
-// //         className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-// //       >
-// //         {vac.aiLoading
-// //           ? "Analyzing..."
-// //           : vac.aiScore
-// //           ? "Re-check Score"
-// //           : "Check Score"}
-// //       </button> */}
-
-// //       {vac.aiScore && (
-
-        
-// //         <div className="mt-4 p-3 border rounded bg-gray-50">
-// //           <p><strong>Score:</strong> {vac.aiScore.score}%</p>
-// //           <p>
-// //             <strong>Matched Skills:</strong>{" "}
-// //             {vac.aiScore.matchedSkills?.join(", ") || "None"}
-// //           </p>
-// //           <p>
-// //             <strong>Missing Skills:</strong>{" "}
-// //             {vac.aiScore.missingSkills?.join(", ") || "None"}
-// //           </p>
-// //           <p className="mt-2">
-// //             <strong>Summary:</strong> {vac.aiScore.summary}
-// //           </p>
-// //         </div>
-// //       )}
-// //     </div>
-// //   ))}
-
-
-//         {/* {vacancies
-//           // ✅ CORE FIX: FILTER BY DB MATCH
-//           .filter(vac =>
-//             matchedOnly
-//               ? vac.aiScores?.some(
-//                   s => String(s.userId) === String(userId)
-//                 )
-//               : true
-//           )
-//           .map(vac => (
-//             <div
-//               key={vac._id}
-//               className="bg-white p-5 rounded shadow"
-//             >
-//               <h3 className="text-lg font-semibold">{vac.title}</h3>
-//               <p className="text-gray-700 mt-1">
-//                 {vac.description}
-//               </p>
-
-//               <button
-//                 onClick={() => checkScore(vac._id)}
-//                 disabled={vac.aiLoading}
-//                 className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-//               >
-//                 {vac.aiLoading
-//                   ? "Analyzing..."
-//                   : vac.aiScore
-//                   ? "Re-check Score"
-//                   : "Check Score"}
-//               </button>
-
-//               {/* ✅ AI SCORE DISPLAY */}
-//               {/* {vac.aiScore && (
-//                 <div className="mt-4 p-3 border rounded bg-gray-50">
-//                   <p>
-//                     <strong>Score:</strong>{" "}
-//                     {vac.aiScore.score}%
-//                   </p>
-//                   <p>
-//                     <strong>Matched Skills:</strong>{" "}
-//                     {vac.aiScore.matchedSkills?.join(", ") ||
-//                       "None"}
-//                   </p>
-//                   <p>
-//                     <strong>Missing Skills:</strong>{" "}
-//                     {vac.aiScore.missingSkills?.join(", ") ||
-//                       "None"}
-//                   </p>
-//                   <p className="mt-2">
-//                     <strong>Summary:</strong>{" "}
-//                     {vac.aiScore.summary}
-//                   </p>
-//                 </div>
-//               )}
-//             </divrouter.post("/analyze-initial/:userId", async (req, res) => {
-//   const { userId } = req.params;
-
-//   try {
-//     // 🔍 Check if user already has ANY score
-//     const alreadyAnalyzed = await Vacancy.exists({
-//       "aiScores.userId": userId
-//     });
-
-//     if (alreadyAnalyzed) {
-//       return res.json({ message: "Initial analysis already done" });
-//     }
-
-//     // 🎯 Pick only 6 jobs (latest / most relevant)
-//     const jobs = await Vacancy.find()
-//       .sort({ createdAt: -1 })
-//       .limit(6);
-
-//     // 🔥 Fire-and-forget (NO await)
-//     jobs.forEach((job, index) => {
-//       setTimeout(() => {
-//         analyzeVacancyForUser(userId, job._id)
-//           .catch(err =>
-//             console.error("Initial analysis error:", err.message)
-//           );
-//       }, index * 3000); // 3s gap (safe for Gemini)
-//     });
-
-//     res.json({
-//       message: "Initial resume analysis started",
-//       jobsQueued: jobs.length
-//     });
-//   } catch (err) {
-//     console.error("Initial analysis failed:", err);
-//     res.status(500).json({ message: "Initial analysis failed" });
-//   }
-// });
-// >
-//           ))}  */}
-// //       </div>
-// //     </div>
-// //   );
-// // }
-// }
-
-
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Topbar from "../components/Topbar";
 
 /* -------- SAFE USER ID -------- */
 const getUserId = () => {
@@ -2136,18 +13,38 @@ const getUserId = () => {
   }
 };
 
-export default function Recruitment({ sidebarOpen }) {
+export default function Recruitment() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [vacancies, setVacancies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState("");
-const [aiLoadingJobId, setAiLoadingJobId] = useState(null);
+  const [aiLoadingJobId, setAiLoadingJobId] = useState(null);
+  const [appliedJobs, setAppliedJobs] = useState([]);
 
   const userId = getUserId();
   const navigate = useNavigate();
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const matchedOnly = params.get("matched") === "true";
+
+  /* ================= FETCH APPLIED JOBS ================= */
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchAppliedJobs = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/applications/user/${userId}`
+        );
+        const data = await res.json();
+        setAppliedJobs(data.map(a => a.vacancyId));
+      } catch (err) {
+        console.error("Failed to fetch applied jobs", err);
+      }
+    };
+
+    fetchAppliedJobs();
+  }, [userId]);
 
   /* ================= FETCH VACANCIES ================= */
   const fetchVacancies = async () => {
@@ -2160,11 +57,7 @@ const [aiLoadingJobId, setAiLoadingJobId] = useState(null);
         const scoreObj = v.atsScores?.find(
           s => String(s.userId) === String(userId)
         );
-
-        return {
-          ...v,
-          atsScore: scoreObj || null
-        };
+        return { ...v, atsScore: scoreObj || null };
       });
 
       setVacancies(enriched);
@@ -2180,248 +73,217 @@ const [aiLoadingJobId, setAiLoadingJobId] = useState(null);
     if (userId) fetchVacancies();
   }, [userId]);
 
-  /* ================= RUN ATS ANALYSIS ================= */
-  const analyzeResume = async () => {
+  /* ================= AI SCORE ================= */
+  const handleCheckAIScore = async (vacancyId) => {
     try {
-      setAnalyzing(true);
-      await fetch(
-        `http://localhost:5000/api/ats/analyze-all/${userId}`,
-        { method: "POST" }
-      );
-      await fetchVacancies(); // refresh scores
+      setAiLoadingJobId(vacancyId);
+
+      await fetch("http://localhost:5000/api/ai/analyze-one", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, vacancyId })
+      });
+
+      await fetchVacancies();
     } catch (err) {
       console.error(err);
-      alert("ATS analysis failed");
+      alert("AI analysis failed");
     } finally {
-      setAnalyzing(false);
+      setAiLoadingJobId(null);
     }
   };
 
+  /* ================= GROUP BY DEPARTMENT ================= */
+  const filteredVacancies = vacancies.filter(v =>
+    matchedOnly ? v.atsScore?.score >= 37 : true
+  );
 
-const handleCheckAIScore = async (vacancyId) => {
-  try {
-    setAiLoadingJobId(vacancyId); // 🔥 show "Analyzing..."
+  const groupedByDepartment = filteredVacancies.reduce((acc, vac) => {
+    const dept = vac.department || "Other";
+    if (!acc[dept]) acc[dept] = [];
+    acc[dept].push(vac);
+    return acc;
+  }, {});
 
-    const res = await fetch("http://localhost:5000/api/ai/analyze-one", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        userId,
-        vacancyId
-      })
-    });
+  if (loading) return <div className="pt-24 text-center text-gray-500">Loading vacancies...</div>;
+  if (error) return <div className="pt-24 text-center text-red-500">{error}</div>;
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "AI analysis failed");
-      return;
-    }
-
-    await fetchVacancies(); // refresh AI scores
-
-  } catch (err) {
-    console.error("AI analyze error:", err);
-    alert("AI analysis failed");
-  } finally {
-    setAiLoadingJobId(null); // 🔥 stop loading
-  }
-};
-
-
-// const handleCheckAIScore = async (vacancyId) => {
-//   try {
-//     const res = await fetch("http://localhost:5000/api/ai/analyze-one", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json"
-//       },
-//       body: JSON.stringify({
-//         userId,
-//         vacancyId
-//       })
-//     });
-
-//     const data = await res.json();
-
-//     if (!res.ok) {
-//       alert(data.error || "AI analysis failed");
-//       return;
-//     }
-
-//     await fetchVacancies(); // refresh AI scores
-//   } catch (err) {
-//     console.error("AI analyze error:", err);
-//   }
-// };
-
-
-
-
-
-  if (loading) return <div className="pt-24 text-center">Loading...</div>;
-  if (error)
-    return <div className="pt-24 text-center text-red-500">{error}</div>;
-
+  /* ================= UI ================= */
   return (
-    <div
-      className={`min-h-screen bg-[#0b1020] px-6 pt-8 text-gray-200
-      transition-all duration-300
-      ${sidebarOpen ? "ml-60" : "ml-0"}`}
-    >
-      {/* HEADER */}
-    {/* HEADER */}
-<div className="flex items-center justify-between mb-6">
-  <h2 className="text-2xl font-semibold">
-    {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
-  </h2>
+    <div className="flex bg-gray-50 min-h-screen text-gray-800">
+      <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
-  {/* ATS ANALYZE BUTTON */}
-  {/* <button
-    onClick={analyzeResume}
-    disabled={analyzing}
-    className={`px-4 py-2 rounded-lg text-sm font-semibold
-      ${analyzing
-        ? "bg-gray-600 cursor-not-allowed"
-        : "bg-blue-600 hover:bg-blue-700"
-      }`}
-  >
-    {analyzing ? "Analyzing..." : "Analyze Resume"}
-  </button> */}
-</div>
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? "ml-60" : "ml-0"}`}>
+        <Topbar setSidebarOpen={setSidebarOpen} />
 
+        <div className="px-8 pt-8 pb-16">
+          {/* HEADER */}
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-2xl font-extrabold tracking-tight text-gray-800">
+                {matchedOnly ? "🎯 Matched Jobs for You" : "Recruitment"}
+              </h2>
+              <p className="text-sm text-gray-400 mt-1">
+                Explore and apply for the latest opportunities
+              </p>
+            </div>
+          </div>
 
-      {/* JOB LIST */}
-      <div className="grid gap-6">
-   {vacancies
-  .filter(v =>
-    matchedOnly ? v.atsScore?.score >= 30 : true
-  )
-  .sort(
-    (a, b) =>
-      (b.atsScore?.score || 0) -
-      (a.atsScore?.score || 0)
-  )
-  .map(vac => {
+          {/* JOB LIST */}
+          <div className="space-y-12">
+            {Object.entries(groupedByDepartment).length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <p className="text-gray-500">No vacancies found.</p>
+              </div>
+            ) : (
+              Object.entries(groupedByDepartment).map(([department, jobs]) => (
+                <div key={department} className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-bold text-indigo-600 uppercase tracking-wider">
+                      {department}
+                    </h3>
+                    <div className="flex-1 h-px bg-indigo-100" />
+                    <span className="text-xs font-semibold text-indigo-400 bg-indigo-50 px-2 py-0.5 rounded-full">
+                      {jobs.length} Jobs
+                    </span>
+                  </div>
 
-    // ✅ FIX: define it HERE
-    const aiScoreForUser = vac.aiScores?.find(
-      s => String(s.userId) === String(userId)
-    );
+                  <div className="grid gap-6">
+                    {jobs
+                      .sort((a, b) => (b.atsScore?.score || 0) - (a.atsScore?.score || 0))
+                      .map(vac => {
+                        const aiScoreForUser = vac.aiScores?.find(
+                          s => String(s.userId) === String(userId)
+                        );
 
-    return (
-      <div
-        key={vac._id}
-        className="relative bg-[#11162a] border border-white/10
-                   rounded-2xl p-6 shadow-lg"
-      >
-        {/* ATS SCORE BADGE */}
-   {vac.atsScore && (
+                        return (
+                          <div
+                            key={vac._id}
+                            className="group relative bg-white border border-gray-200
+                                       rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200"
+                          >
+                            {/* ATS BADGE */}
+                          {vac.atsScore && (
   <span
-    className={`absolute top-4 right-4 px-3 py-1
-      text-sm font-semibold rounded-full
+    className={`absolute top-6 right-6 px-3 py-1
+      text-[10px] font-bold uppercase tracking-widest rounded-full
       ${
-        vac.atsScore.score >= 32
-          ? "bg-green-500/20 text-green-400"
-          : vac.atsScore.score >= 26
-          ? "bg-yellow-500/20 text-yellow-400"
-          : "bg-red-500/20 text-red-400"
+        vac.atsScore.score >= 37
+          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+          : vac.atsScore.score >= 35
+          ? "bg-amber-50 text-amber-700 border border-amber-200"
+          : "bg-rose-50 text-rose-700 border border-rose-200"
       }`}
   >
-    {vac.atsScore.score >= 32
+    {vac.atsScore.score >= 37
       ? "High Match"
-      : vac.atsScore.score >= 26
+      : vac.atsScore.score >= 35
       ? "Partial Match"
       : "Low Match"}
   </span>
 )}
+                            <div className="max-w-3xl">
+                              <h3 className="text-xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">
+                                {vac.title}
+                              </h3>
+                              <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+                                {vac.jobDescription}
+                              </p>
+                            </div>
 
+                            {/* ACTIONS */}
+                            <div className="mt-6 flex flex-wrap gap-3">
+                              <button
+                                onClick={() => handleCheckAIScore(vac._id)}
+                                disabled={aiLoadingJobId === vac._id}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold
+                                         bg-indigo-50 text-indigo-600 border border-indigo-100
+                                         hover:bg-indigo-100 transition-all duration-200 disabled:opacity-50"
+                              >
+                                {aiLoadingJobId === vac._id ? (
+                                  <><span className="animate-spin text-lg">🤖</span> Analyzing...</>
+                                ) : "🤖 Check AI Match"}
+                              </button>
 
-        <h3 className="text-lg font-semibold">{vac.title}</h3>
-        <p className="text-gray-400 mt-2 line-clamp-3">
-          {vac.jobDescription}
-        </p>
+                              <button
+                                onClick={() => navigate(`/apply/${vac._id}`)}
+                                disabled={appliedJobs.includes(vac._id)}
+                                className={`px-5 py-2 rounded-xl text-sm font-bold shadow-sm transition-all duration-200
+                                  ${appliedJobs.includes(vac._id)
+                                    ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                                    : "bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-indigo-200"
+                                  }`}
+                              >
+                                {appliedJobs.includes(vac._id) ? "Applied" : "Apply Now"}
+                              </button>
+                            </div>
 
-        {/* APPLY BUTTON */}
-        
+                            {/* AI SCORE ANALYSIS */}
+                            {aiScoreForUser && (
+                              <div className="mt-6 bg-gray-50 rounded-2xl border border-gray-200 p-5 space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <div className="p-1.5 bg-indigo-100 rounded-lg">
+                                      <span className="text-lg">🤖</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-gray-800">AI Match Analysis</p>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs font-semibold text-gray-400">Match Score:</span>
+                                    <span className={`text-sm font-black ${aiScoreForUser.score >= 80 ? "text-emerald-600" :
+                                        aiScoreForUser.score >= 50 ? "text-amber-600" : "text-rose-600"
+                                      }`}>
+                                      {aiScoreForUser.score}%
+                                    </span>
+                                  </div>
+                                </div>
 
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  {aiScoreForUser.matchedSkills?.length > 0 && (
+                                    <div className="space-y-1.5">
+                                      <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-widest">Matched Skills</p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {aiScoreForUser.matchedSkills.map(skill => (
+                                          <span key={skill} className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                            {skill}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
 
-{vac.atsScore?.score >= 32 && (
-  <button
-    onClick={() => handleCheckAIScore(vac._id)}
-    disabled={aiLoadingJobId === vac._id}
-    className={`mt-4 px-4 py-2 rounded-lg text-sm
-      ${
-        aiLoadingJobId === vac._id
-          ? "bg-gray-600 cursor-not-allowed"
-          : "bg-indigo-600 hover:bg-indigo-700"
-      }`}
-  >
-    {aiLoadingJobId === vac._id ? "🤖 Analyzing..." : "🤖 Check AI Match"}
-  </button>
-)}
+                                  {aiScoreForUser.missingSkills?.length > 0 && (
+                                    <div className="space-y-1.5">
+                                      <p className="text-[11px] font-bold text-rose-700 uppercase tracking-widest">Missing Skills</p>
+                                      <div className="flex flex-wrap gap-1.5">
+                                        {aiScoreForUser.missingSkills.map(skill => (
+                                          <span key={skill} className="text-[10px] px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-100">
+                                            {skill}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
 
-
-{vac.atsScore?.score >= 32 && (
-          <button
-            onClick={() => navigate(`/apply/${vac._id}`)}
-            className="mt-4 bg-green-600 hover:bg-green-700
-                       px-4 py-2 rounded-lg text-sm"
-          >
-            Apply
-          </button>
-        )}
-
-        {/* ATS DETAILS */}
-        {vac.atsScore && (
-          <div className="mt-4 text-sm text-gray-300">
-            {/* <strong>ATS Score:</strong> {vac.atsScore.score}% */}
+                                {aiScoreForUser.summary && (
+                                  <div className="pt-2 border-t border-gray-200">
+                                    <p className="text-xs text-gray-500 leading-relaxed italic">
+                                      "{aiScoreForUser.summary}"
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-        )}
-
-  
-        {/* 🤖 AI SCORE — USER SAFE */}
-        {aiScoreForUser && (
-          <div
-            className="mt-4 bg-[#0b1020] border border-white/10
-                       rounded-xl p-4 text-sm space-y-2"
-          >
-
-            <p className="text-indigo-400 font-semibold">
-              🤖 AI Match Analysis
-            </p>
-
-            <p>
-              <strong>AI Score:</strong> {aiScoreForUser.score}%
-            </p>
-
-            {aiScoreForUser.matchedSkills?.length > 0 && (
-              <p className="text-green-400">
-                <strong>Matched Skills:</strong>{" "}
-                {aiScoreForUser.matchedSkills.join(", ")}
-              </p>
-            )}
-
-            {aiScoreForUser.missingSkills?.length > 0 && (
-              <p className="text-red-400">
-                <strong>Missing Skills:</strong>{" "}
-                {aiScoreForUser.missingSkills.join(", ")}
-              </p>
-            )}
-
-            {aiScoreForUser.summary && (
-              <p className="text-gray-400">
-                {aiScoreForUser.summary}
-              </p>
-            )}
-          </div>
-        )}
-      </div>
-    );
-  })}
-
+        </div>
       </div>
     </div>
   );

@@ -187,8 +187,24 @@ const vacancySchema = new mongoose.Schema(
 // },
 // aiKeywords: {
 //   type: [String],
+
+
 //   default: []
 // }
+
+
+// Vacancy Schema additions
+embedding: {
+  type: [Number],
+  default: []
+},
+
+skillEmbeddings: [
+  {
+    skill: String,
+    embedding: [Number]
+  }
+],
 atsScores: [
   {
     userId: {
@@ -200,6 +216,24 @@ atsScores: [
   }
 ]
 ,
+applications: [
+    {
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+      },
+      status: {
+        type: String,
+        enum: ["PENDING", "APPROVED", "REJECTED"],
+        default: "PENDING"
+      },
+      appliedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
 
     // ===== AI ANALYSIS =====
     aiScores: [

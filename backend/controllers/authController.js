@@ -40,7 +40,7 @@ exports.signup = async (req, res) => {
 const jwt = require("jsonwebtoken");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
 
-// ✅ Login
+// Login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -54,8 +54,8 @@ exports.login = async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    console.log("✅ ACCESS TOKEN:", accessToken);
-console.log("✅ REFRESH TOKEN:", refreshToken);
+//     console.log("✅ ACCESS TOKEN:", accessToken);
+// console.log("✅ REFRESH TOKEN:", refreshToken);
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -98,80 +98,6 @@ exports.refreshToken = async (req, res) => {
 };
 
 
-// // ✅ Login controller
-// exports.login = async (req, res) => {
-//   const { email, password } = req.body;
-
-//   try {
-//     const user = await User.findOne({ email });
-//     if (!user) return res.status(400).json({ message: "User not found" });
-
-//     const isMatch = await bcrypt.compare(password, user.password);
-//     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
-
-//     res.json({
-//       user: { id: user._id, name: user.name, email: user.email },
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// exports.getProfile = async (req, res) => {
-//   const userId = req.params.id;
-
-//   try {
-//     const user = await User.findById(userId).select("-password");
-//     if (!user) return res.status(404).json({ message: "User not found" });
-//     res.json(user);
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-// // Update profile
-// exports.updateProfile = async (req, res) => {
-//   const userId = req.params.id;
-//   const { name, phone, designation } = req.body;
-//   let resumePath = null;
-
-//   if (req.file) {
-//     resumePath = `/uploads/${req.file.filename}`;
-//   }
-
-//   try {
-//     const user = await User.findById(userId);
-//     if (!user) return res.status(404).json({ message: "User not found" });
-
-//     user.name = name || user.name;
-//     user.phone = phone || user.phone;
-//     user.designation = designation || user.designation;
-//     if (resumePath) user.resume = resumePath;
-
-//     await user.save();
-
-//     res.json({ message: "Profile updated successfully", user });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// const User = require("../models/User");
-
-// // Get profile
-// exports.getProfile = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.id).select("-password");
-//     if (!user) return res.status(404).json({ message: "User not found" });
-//     res.json(user);
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 
 
@@ -180,13 +106,13 @@ exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .select("-password")
-      .lean(); // ✅ IMPORTANT
+      .lean(); //  IMPORTANT
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ Explicit response
+    //  Explicit response
     res.json({
       name: user.name,
       email: user.email,
@@ -194,7 +120,7 @@ exports.getProfile = async (req, res) => {
       designation: user.designation,
       skills: user.skills,
       resume: user.resume,
-      atsAnalyzed: user.atsAnalyzed || false // 🔥 CRITICAL
+      atsAnalyzed: user.atsAnalyzed || false 
     });
 
   } catch (err) {
@@ -203,41 +129,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// Update profile
-
-// exports.updateProfile = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.params.id);
-//     if (!user) return res.status(404).json({ message: "User not found" });
-
-//     // Extract values from req.body (works with multer FormData)
-//     const { name, phone, designation, skills } = req.body;
-
-//     user.name = name || user.name;
-//     user.phone = phone || user.phone;
-//     user.designation = designation || user.designation;
-
-//     // Optional skills as array
-//     if (skills) {
-//       try {
-//         const skillsArray = JSON.parse(skills);
-//         if (Array.isArray(skillsArray)) user.skills = skillsArray;
-//       } catch {}
-//     }
-
-//     // Resume file
-//     if (req.file) {
-//       user.resume = `uploads/${req.file.filename}`;
-//     }
-
-//     await user.save();
-
-//     res.json({ message: "Profile updated successfully", user });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 
 

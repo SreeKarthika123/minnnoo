@@ -1,288 +1,313 @@
-import { useState ,useEffect} from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
- 
+import { Search, Bell, ChevronDown, UserCircle, LogOut, Menu } from "lucide-react";
+
 export default function Topbar({ setSidebarOpen }) {
-
   const navigate = useNavigate();
-  // const [open, setOpen] = useState(false);
- const [open, setOpen] = useState(false);
-const [showNotifications, setShowNotifications] = useState(false);
-const [notifications, setNotifications] = useState([]);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadOnly, setUnreadOnly] = useState(true);
 
-//   const user = JSON.parse(localStorage.getItem("user"));
- 
-let user = null;
- 
-try {
-  const storedUser = localStorage.getItem("user");
-  if (storedUser && storedUser !== "undefined" && storedUser !== "null") {
-    user = JSON.parse(storedUser);
+  const [query, setQuery] = useState("");
+const [results, setResults] = useState([]);
+const [searchOpen, setSearchOpen] = useState(false);
+const searchRef = useRef(null);
+  const profileRef = useRef(null);
+  const notifRef = useRef(null);
+
+  let user = null;
+  try {
+    const stored = localStorage.getItem("user");
+    if (stored && stored !== "undefined" && stored !== "null") {
+      user = JSON.parse(stored);
+    }
+  } catch {
+    user = null;
   }
-} catch (err) {
-  console.error("Invalid user in localStorage", err);
-  user = null;
-}
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const visibleNotifications = unreadOnly
+    ? notifications.filter((n) => !n.read)
+    : notifications;
+
+  useEffect(() => {
+    const userId = user?._id || user?.id;
+    if (!userId) return;
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/notifications/user/${userId}`);
+        const data = await res.json();
+        setNotifications(data);
+      } catch (err) {
+        console.error("Notification fetch error", err);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+
+  useEffect(() => {
+  if (!query.trim()) {
+    setResults([]);
+    return;
+  }
+
+  const timer = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:5000/api/users/search?q=${query}`
+      );
+      const data = await res.json();
+      setResults(data);
+      setSearchOpen(true);
+    } catch (err) {
+      console.error("Search error", err);
+    }
+  }, 300);
+
+  return () => clearTimeout(timer);
+}, [query]);
 
 
 
 useEffect(() => {
-
-  const userId = user?._id || user?.id;
-if (!userId) return;
-
-  // if (!user?._id) return;
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/notifications/user/${userId}`
-      );
-      const data = await res.json();
-      setNotifications(data);
-    } catch (err) {
-      console.error("Notification fetch error", err);
+  const handler = (e) => {
+    if (searchRef.current && !searchRef.current.contains(e.target)) {
+      setSearchOpen(false);
     }
   };
+  document.addEventListener("mousedown", handler);
+  return () => document.removeEventListener("mousedown", handler);
+}, []);
 
-  fetchNotifications();
-}, [user]);
+  useEffect(() => {
+    const handler = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) setProfileOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target)) setShowNotifications(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
- return (
-  <div className="bg-[#0b1020] px-6 py-3 border-b border-white/10
-                  flex justify-between items-center sticky top-0 z-20">
+  const markAsRead = async (n) => {
+    if (n.read) return;
+    await fetch(`http://localhost:5000/api/notifications/read/${n._id}`, { method: "PATCH" });
+    setNotifications((prev) => prev.map((x) => (x._id === n._id ? { ...x, read: true } : x)));
+    setUnreadOnly(false);
+  };
 
-    {/* LEFT SECTION */}
-    <div className="flex items-center gap-4">
-      {/* Sidebar toggle */}
-      <button
-        onClick={() => setSidebarOpen(prev => !prev)}
-        className="text-2xl text-gray-300 hover:text-white transition"
-      >
-        ☰
-      </button>
+  return (
+    <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-3
+                    bg-white border-b border-gray-200 shadow-sm">
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder="Search for people"
-        className="bg-[#11162a] text-sm text-gray-200
-                   placeholder-gray-500
-                   border border-white/10 rounded-lg
-                   px-4 py-2 w-80
-                   focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-      />
+      {/* ── LEFT ── */}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setSidebarOpen((prev) => !prev)}
+          className="w-8 h-8 flex items-center justify-center rounded-lg
+                     text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+        >
+          <Menu size={18} />
+        </button>
+
+      <div className="relative" ref={searchRef}>
+  <Search
+    size={14}
+    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+  />
+
+  <input
+    type="text"
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+    placeholder="Search for people…"
+    className="bg-gray-50 text-sm text-gray-700
+               border border-gray-200 rounded-xl
+               pl-9 pr-4 py-2 w-72
+               focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
+  />
+
+  {/* 🔽 Search Results */}
+  {searchOpen && results.length > 0 && (
+    <div className="absolute mt-2 w-full bg-white rounded-xl
+                    border border-gray-200 shadow-lg z-50 overflow-hidden">
+      {results.map((u) => (
+        <div
+          key={u._id}
+          onClick={() => {
+            navigate(`/profile/${u._id}`);
+            setSearchOpen(false);
+            setQuery("");
+          }}
+          className="px-4 py-3 cursor-pointer
+                     hover:bg-indigo-50 transition"
+        >
+          <p className="text-sm font-semibold text-gray-800">{u.name}</p>
+          <p className="text-xs text-gray-400">{u.email}</p>
+        </div>
+      ))}
     </div>
+  )}
 
-    {/* RIGHT SECTION */}
-    <div className="flex items-center gap-6 relative">
-      {/* Welcome */}
-      <span className="text-sm text-gray-300">
-        Welcome, <span className="text-white font-medium">
-          {user?.name || "Guest"}
-        </span> 👋
-      </span>
-
-
-
-      
-{/* Notification Bell */}
-<div className="relative">
-  <button
-    onClick={() => setShowNotifications(prev => !prev)}
-    className="text-xl text-gray-300 hover:text-white transition relative"
-  >
-    🔔
-    {notifications.length > 0 && (
-      <span
-        className="absolute -top-1 -right-1
-                   bg-red-500 text-xs text-white
-                   rounded-full px-1"
-      >
-        {notifications.length}
-      </span>
-    )}
-  </button>
-
-  {/* Notification Dropdown */}
-  {showNotifications && (
-    <div
-      className="absolute right-0 mt-3 w-96
-                 bg-[#11162a]
-                 border border-blue-400/20
-                 rounded-xl shadow-xl p-4 z-50"
-    >
-      <h3 className="text-blue-400 font-semibold mb-3">
-        Notifications
-      </h3>
-
-      {notifications.length === 0 ? (
-        <p className="text-sm text-gray-400">
-          No notifications
-        </p>
-      ) : (
-        notifications.map((n) => (
-          <div
-            key={n._id}
-            className="flex justify-between items-center
-                       bg-black/40 p-3 rounded mb-2"
-          >
-            <div>
-              <p className="text-sm">{n.message}</p>
-              <p className="text-xs text-gray-400">
-                Job: {n.vacancyId?.title}
-              </p>
-            </div>
-
-           <button
-  onClick={async () => {
-    await fetch(
-      `http://localhost:5000/api/notifications/read/${n._id}`,
-      { method: "PATCH" }
-    );
-
-    // remove from UI immediately
-    setNotifications(prev =>
-      prev.filter(x => x._id !== n._id)
-    );
-
-    navigate(`/recruitment/${n.vacancyId?._id}`);
-    setShowNotifications(false);
-  }}
-  className="text-sm bg-green-600 px-3 py-1 rounded"
->
-  Apply
-</button>
-
-          </div>
-        ))
-      )}
+  {searchOpen && query && results.length === 0 && (
+    <div className="absolute mt-2 w-full bg-white rounded-xl
+                    border border-gray-200 shadow-lg p-4 text-sm text-gray-400">
+      No users found
     </div>
   )}
 </div>
+      </div>
 
-      {/* Notification */}
-      {/* <button className="text-xl text-gray-300 hover:text-white transition">
-        🔔
-      </button> */}
+      {/* ── RIGHT ── */}
+      <div className="flex items-center gap-3">
+        {/* Welcome */}
+        <span className="text-sm text-gray-500 hidden sm:block">
+          Welcome back,{" "}
+          <span className="text-gray-800 font-semibold">{user?.name || "Guest"}</span> 👋
+        </span>
 
-      {/* Profile */}
-      <div className="relative">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="profile"
-          className="w-9 h-9 rounded-full cursor-pointer border border-white/20"
-          onClick={() => setOpen(!open)}
-        />
+        {/* ── Notification Bell ── */}
+        <div className="relative" ref={notifRef}>
+          <button
+            onClick={() => setShowNotifications((p) => !p)}
+            className="relative w-9 h-9 flex items-center justify-center rounded-xl
+                       text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-all"
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span
+                className="absolute top-1 right-1 min-w-[16px] h-4 px-1 rounded-full
+                           flex items-center justify-center text-[10px] font-bold text-white bg-red-500"
+              >
+                {unreadCount}
+              </span>
+            )}
+          </button>
 
-        {open && (
-          <div className="absolute right-0 mt-3 w-48
-                          bg-[#11162a] border border-white/10
-                          rounded-xl shadow-xl py-2">
-
-            <button
-              className="w-full text-left px-4 py-2 text-sm
-                         text-gray-300 hover:bg-white/5 hover:text-white"
-              onClick={() => {
-                setOpen(false);
-                navigate("/profile");
-              }}
+          {showNotifications && (
+            <div
+              className="absolute right-0 mt-2 w-96 rounded-2xl border border-gray-200
+                         shadow-xl overflow-hidden z-50 bg-white"
             >
-              My Profile
-            </button>
+              {/* Header */}
+              <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                <div className="flex items-center gap-2">
+                  <Bell size={14} className="text-indigo-500" />
+                  <h3 className="font-semibold text-gray-800 text-sm">Notifications</h3>
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold
+                                     bg-indigo-50 text-indigo-600">
+                      {unreadCount} new
+                    </span>
+                  )}
+                </div>
+                <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer select-none">
+                  <span>Unread only</span>
+                  <div
+                    onClick={() => setUnreadOnly((p) => !p)}
+                    className={`relative w-8 h-4 rounded-full cursor-pointer transition-colors duration-200
+                      ${unreadOnly ? "bg-indigo-500" : "bg-gray-200"}`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-all duration-200
+                        ${unreadOnly ? "left-4" : "left-0.5"}`}
+                    />
+                  </div>
+                </label>
+              </div>
 
-            <button
-              className="w-full text-left px-4 py-2 text-sm
-                         text-red-400 hover:bg-red-500/10"
-              onClick={() => {
-                localStorage.removeItem("user");
-                window.location.href = "/login";
-              }}
+              {/* List */}
+              <div className="max-h-80 overflow-y-auto">
+                {visibleNotifications.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 gap-2">
+                    <Bell size={28} className="text-gray-300" />
+                    <p className="text-sm text-gray-400">No notifications</p>
+                  </div>
+                ) : (
+                  visibleNotifications.map((n) => (
+                    <div
+                      key={n._id}
+                      onClick={() => markAsRead(n)}
+                      className={`flex items-start gap-3 px-4 py-3 cursor-pointer
+                        border-b border-gray-50 last:border-0 transition-colors duration-150
+                        ${n.read ? "hover:bg-gray-50" : "bg-indigo-50/50 hover:bg-indigo-50"}`}
+                    >
+                      <div className="mt-1.5 shrink-0">
+                        {n.read
+                          ? <span className="w-2 h-2 block rounded-full bg-gray-200" />
+                          : <span className="w-2 h-2 block rounded-full bg-indigo-500" />
+                        }
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className={`text-sm ${n.read ? "text-gray-500" : "text-gray-800 font-medium"}`}>
+                          {n.message}
+                        </p>
+                        {n.vacancyId?.title && (
+                          <p className="text-xs text-gray-400 mt-0.5 truncate">
+                            📋 {n.vacancyId.title}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Profile Menu ── */}
+        <div className="relative" ref={profileRef}>
+          <button
+            onClick={() => setProfileOpen((p) => !p)}
+            className="flex items-center gap-2 pl-1 pr-2.5 py-1 rounded-xl
+                       hover:bg-gray-100 transition-all duration-200"
+          >
+            <img
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "U")}&background=4f46e5&color=fff&size=64`}
+              alt="avatar"
+              className="w-8 h-8 rounded-lg object-cover"
+            />
+            <ChevronDown
+              size={14}
+              className={`text-gray-400 transition-transform duration-200 ${profileOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {profileOpen && (
+            <div
+              className="absolute right-0 mt-2 w-52 rounded-2xl border border-gray-200
+                         shadow-xl py-1.5 overflow-hidden z-50 bg-white"
             >
-              Logout
-            </button>
-          </div>
-        )}
+              <div className="px-4 py-3 border-b border-gray-100">
+                <p className="text-sm font-semibold text-gray-800 truncate">{user?.name || "Guest"}</p>
+                <p className="text-xs text-gray-400 truncate">{user?.email || ""}</p>
+              </div>
+
+              <button
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                           text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                onClick={() => { setProfileOpen(false); navigate("/profile"); }}
+              >
+                <UserCircle size={15} className="text-indigo-500" />
+                My Profile
+              </button>
+
+              <div className="mx-3 my-1 h-px bg-gray-100" />
+
+              <button
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                           text-red-500 hover:bg-red-50 transition-colors"
+                onClick={() => { localStorage.removeItem("user"); window.location.href = "/login"; }}
+              >
+                <LogOut size={15} />
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
-  </div>
-);
-
- 
- 
-//   return (
-//     <div className="bg-white px-6 py-2 border-b flex justify-between items-center sticky top-0 z-20">
-
-//     {/* <div className="bg-white px-6 py-1 border-b flex justify-between items-center sticky top-0 z-20 -mt-25"> */}
-
-//     {/* <div className="bg-white px-6 py-2 border-b flex justify-between items-center sticky top-0 z-20"> */}
-
-//      {/* <div className="bg-white px-6 py-4 border-b flex justify-between items-center sticky top-0 z-20"> */}
- 
-//     {/* <div className="bg-white px-6 py-4 border-b flex justify-between items-center fixed top-0 left-0 right-0 z-20"> */}
-      
-//       {/* Search */}
-
-//       <button
-//   onClick={() => setSidebarOpen(prev => !prev)}
-//   className="text-2xl cursor-pointer mr-4"
-// >
-//   ☰
-// </button>
-
-//     <input
-//   type="text"
-//   placeholder="Search for people"
-//   className="border rounded-md px-4 py-1.5 w-96 relative -top-3"
-// />
-
-//       {/* Right section */}
-//       <div className="flex items-center gap-4 relative">
-        
-//      <span className="text-gray-700 font-medium relative -top-3">
-//   Welcome, {user?.name || "Guest"} 👋
-// </span>
-
- 
- 
-//         {/* Notification */}
-//         <span className="text-xl cursor-pointer relative -top-3">🔔</span>
-
-//         {/* <span className="text-xl cursor-pointer">🔔</span> */}
- 
-//         {/* Profile */}
-//         <div className="relative -top-3">
-
-//         {/* <div className="relative"> */}
-//           <img
-//             // src="https://i.pravatar.cc/40"
-//             alt="profile"
-//             className="rounded-full cursor-pointer"
-//             onClick={() => setOpen(!open)}
-//           />
- 
-//           {open && (
-//             <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg py-2">
-//               <button
-//                 className="w-full text-left px-4 py-2 hover:bg-gray-100"
-//                 onClick={() => navigate("/profile")}
-//               >
-//                 My Profile
-//               </button>
- 
-//              <button
-//   className="w-full text-left px-4 py-2 hover:bg-gray-100"
-//   onClick={() => {
-//     localStorage.removeItem("user"); // clear user from storage
-//     window.location.href = "/login"; // redirect to login
-//   }}
-// >
-//   Logout
-// </button>
-
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
+  );
 }

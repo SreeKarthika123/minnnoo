@@ -11,7 +11,7 @@
 
 const express = require("express");
 const router = express.Router();
-const { getDashboardVacancies } = require("../controllers/dashboardController");
+// const { getDashboardVacancies } = require("../controllers/dashboardController");
 
 router.get("/dashboard/:userId", getDashboardVacancies);
 

@@ -111,6 +111,10 @@ import HrDashboard from "./components/HrDashboard";
 import TopEmployeesHR from "./components/TopEmployeesHR";
 import Recruitment from "./pages/Recruitment";
 import TopEmployees from "./components/TopEmployees";
+import VacancyCandidates from "./components/VacancyCandidates";
+import TopCards from "./components/TopCards"
+import Analytics from "./components/Analytics";
+// import ApplyJob from "./components/ApplyJob";
 // import mongoose from "mongoose";
 // import MatchedApplications from "./components/MatchedApplications";
 function App() {
@@ -148,6 +152,8 @@ function App() {
           path="/dashboard"
           element={user ? <Dashboard /> : <Navigate to="/login" />}
         />
+
+       <Route path="/profile/:userId" element={<Profile />} />
         <Route
           path="/profile"
           element={user ? <Profile /> : <Navigate to="/login" />}
@@ -166,6 +172,12 @@ function App() {
             : <Navigate to="/hr-login" />
         }
       />
+
+
+      <Route
+          path="/hr/vacancies/:vacancyId/candidates"
+          element={<VacancyCandidates />}
+        />
 
 {/* <Route
   path="/applications/matched"
@@ -191,6 +203,8 @@ function App() {
 
 
  <Route path="/vacancies" element={<Vacancies />} />
+
+  <Route path="/analytics" element={<Analytics/>} />
  <Route path="/home" element={<Home />} />
 <Route
   path="/recruitment"
@@ -199,17 +213,22 @@ function App() {
 
 />
 
+<Route path="/apply/:jobId" element={<ApplyJob />} />
 <Route
   path="/top-employees"
   element={user ? <TopEmployeesHR/> : <Navigate to="/login" />}
 />
 
-<Route
+{/* <Route
   path="/recruitment/:vacancyId"
   element={<ApplyJob />}
 />
+ */}
 
-
+<Route
+  path="/topcards"
+  element={user ? <TopCards/> : <Navigate to="/login" />}
+/>
 
 <Route
   path="/top-emp"

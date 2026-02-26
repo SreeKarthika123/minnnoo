@@ -1,6 +1,6 @@
 
 const mongoose = require("mongoose");
-const { ChatCompletionStreamingRunner } = require("openai/lib/ChatCompletionStreamingRunner.js");
+// const { ChatCompletionStreamingRunner } = require("openai/lib/ChatCompletionStreamingRunner.js");
 
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -11,7 +11,7 @@ const UserSchema = new mongoose.Schema({
   resume: { type: String },             // File path
   designation: { type: String }, 
    skills: { type: [String], default: [] },
-   refreshToken:{type:String},
+  //  refreshToken:{type:String},
  parsedResume: {
     text: String,
     // embedding: { type: [Number], default: [] }
@@ -39,7 +39,7 @@ atsAnalyzed: {
 //   status: { type: String, default: "idle" }
 // }
 
-         // Optional additional details
+       
 });
 
 module.exports = mongoose.model("User", UserSchema);

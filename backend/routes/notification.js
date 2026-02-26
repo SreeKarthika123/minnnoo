@@ -29,35 +29,52 @@ router.post("/send", async (req, res) => {
 });
 
 
-router.patch("/read/:id", async (req, res) => {
-  try {
-    await Notification.findByIdAndUpdate(
-      req.params.id,
-      { read: true }
-    );
+// router.patch("/read/:id", async (req, res) => {
+//   try {
+//     await Notification.findByIdAndUpdate(
+//       req.params.id,
+//       { read: true }
+//     );
 
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to mark as read" });
-  }
+//     res.json({ success: true });
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to mark as read" });
+//   }
+// });
+
+router.patch("/read/:id", async (req, res) => {
+  await Notification.findByIdAndUpdate(req.params.id, {
+    read: true
+  });
+  res.json({ success: true });
 });
 
+// router.get("/user/:userId", async (req, res) => {
+//   try {
+//     const notifications = await Notification.find({
+//       userId: req.params.userId,
+//       read: false        
+//     })
+//       .populate("vacancyId", "title")
+//       .sort({ createdAt: -1 });
+
+//     res.json(notifications);
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to fetch notifications" });
+//   }
+// });
 
 router.get("/user/:userId", async (req, res) => {
-  try {
-    const notifications = await Notification.find({
-      userId: req.params.userId,
-      read: false        // 👈 IMPORTANT
-    })
-      .populate("vacancyId", "title")
-      .sort({ createdAt: -1 });
+  const { unreadOnly } = req.query;
 
-    res.json(notifications);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch notifications" });
-  }
+  const filter = { userId: req.params.userId };
+  if (unreadOnly === "true") filter.read = false;
+
+  const notifications = await Notification.find(filter)
+    .populate("vacancyId", "title")
+    .sort({ createdAt: -1 });
+
+  res.json(notifications);
 });
-
-
 
 module.exports = router;
