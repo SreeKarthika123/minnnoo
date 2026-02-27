@@ -25,21 +25,20 @@
 //   }
 //   next();
 // };
-
-
-
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  const token = req.cookies.accessToken; // 👈 KEY LINE
 
-  if (!token) return res.status(401).json({ message: "No token" });
+  if (!token) {
+    return res.status(401).json({ message: "No token, unauthorized" });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
-    req.user = decoded;
+    req.user = { id: decoded.id };
     next();
   } catch (err) {
-    res.status(401).json({ message: "Token expired" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };

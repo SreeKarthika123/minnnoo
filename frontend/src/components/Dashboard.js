@@ -14,6 +14,9 @@ const getUserId = () => {
     return null;
   }
 };
+const openUser = (id) => {
+  navigate(`/users/${id}`);
+};
 
 export default function Dashboard() {
   const [matchCount, setMatchCount] = useState(0);
@@ -132,6 +135,8 @@ export default function Dashboard() {
         <Topbar setSidebarOpen={setSidebarOpen} />
 
         <div className="px-8 pt-8 pb-10 space-y-6">
+
+          
 
           {/* ── Stat Cards ── */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

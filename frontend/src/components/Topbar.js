@@ -132,7 +132,22 @@ useEffect(() => {
   {searchOpen && results.length > 0 && (
     <div className="absolute mt-2 w-full bg-white rounded-xl
                     border border-gray-200 shadow-lg z-50 overflow-hidden">
-      {results.map((u) => (
+                      {results.map((u) => (
+  <div
+    key={u._id}
+    onClick={() => {
+      navigate(`/users/${u._id}`); // ✅ NEW PAGE
+      setSearchOpen(false);
+      setQuery("");
+    }}
+    className="px-4 py-3 cursor-pointer
+               hover:bg-indigo-50 transition"
+  >
+    <p className="text-sm font-semibold text-gray-800">{u.name}</p>
+    <p className="text-xs text-gray-400">{u.email}</p>
+  </div>
+))}
+      {/* {results.map((u) => (
         <div
           key={u._id}
           onClick={() => {
@@ -146,7 +161,7 @@ useEffect(() => {
           <p className="text-sm font-semibold text-gray-800">{u.name}</p>
           <p className="text-xs text-gray-400">{u.email}</p>
         </div>
-      ))}
+      ))} */}
     </div>
   )}
 

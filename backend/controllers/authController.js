@@ -40,35 +40,82 @@ exports.signup = async (req, res) => {
 const jwt = require("jsonwebtoken");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
 
-// Login
+// // Login
+// exports.login = async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     const user = await User.findOne({ email });
+//     if (!user) return res.status(400).json({ message: "User not found" });
+
+//     const isMatch = await bcrypt.compare(password, user.password);
+//     if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+
+//     const accessToken = generateAccessToken(user);
+//     const refreshToken = generateRefreshToken(user);
+
+// //     console.log("✅ ACCESS TOKEN:", accessToken);
+// // console.log("✅ REFRESH TOKEN:", refreshToken);
+//     user.refreshToken = refreshToken;
+//     await user.save();
+
+//     res.json({
+//       accessToken,
+//       refreshToken,
+//       user: { id: user._id, name: user.name, email: user.email },
+//     });
+//   } catch (err) {
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: "User not found" });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid password" });
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-//     console.log("✅ ACCESS TOKEN:", accessToken);
-// console.log("✅ REFRESH TOKEN:", refreshToken);
     user.refreshToken = refreshToken;
     await user.save();
 
+    // ✅ SET COOKIES (THIS WAS MISSING)
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000, // 15 min
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.json({
-      accessToken,
-      refreshToken,
-      user: { id: user._id, name: user.name, email: user.email },
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      },
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 
 
 exports.refreshToken = async (req, res) => {

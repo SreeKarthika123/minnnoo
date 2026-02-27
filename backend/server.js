@@ -8,6 +8,7 @@ const applicationRoutes = require("./routes/applicationRoutes");
 // const dashboardRoutes = require("./routes/dashboardRoutes");
 const authRoutes = require("./routes/auth");
 const hrRoutes = require("./routes/hr.js");
+const cookieParser = require("cookie-parser");
 const app = express();
 const aiRoutes =require("./routes/aiRoutes.js");
 const atsScoring=require("./routes/ats.js");
@@ -25,10 +26,13 @@ const chatbotRoutes = require("./routes/chatbot");
 const userRoutes = require("./routes/users");
 
 
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
-
+app.use(cookieParser());
 // MongoDB connection
 mongoose
   .connect("mongodb://127.0.0.1:27017/minno")

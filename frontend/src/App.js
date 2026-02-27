@@ -113,6 +113,8 @@ import Recruitment from "./pages/Recruitment";
 import TopEmployees from "./components/TopEmployees";
 import VacancyCandidates from "./components/VacancyCandidates";
 import TopCards from "./components/TopCards"
+import UserProfileView from "./components/UserProfileView";
+
 import Analytics from "./components/Analytics";
 // import ApplyJob from "./components/ApplyJob";
 // import mongoose from "mongoose";
@@ -153,7 +155,7 @@ function App() {
           element={user ? <Dashboard /> : <Navigate to="/login" />}
         />
 
-       <Route path="/profile/:userId" element={<Profile />} />
+       {/* <Route path="/profile/:userId" element={<Profile />} /> */}
         <Route
           path="/profile"
           element={user ? <Profile /> : <Navigate to="/login" />}
@@ -224,6 +226,8 @@ function App() {
   element={<ApplyJob />}
 />
  */}
+
+ <Route path="/users/:userId" element={<UserProfileView />} />
 
 <Route
   path="/topcards"
